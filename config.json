@@ -1,5 +1,5 @@
 {
-    "name": "raspi-deployment-microservice",
+    "name": "flight-deck",
     "port": "8008",
     "env-vars": [
         "AWS_ACCESS_KEY",
