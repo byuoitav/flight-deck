@@ -6,8 +6,8 @@ import (
 	"github.com/byuoitav/authmiddleware"
 	"github.com/byuoitav/common"
 	"github.com/byuoitav/common/log"
-	"github.com/byuoitav/raspi-deployment-microservice/handlers"
-	"github.com/byuoitav/raspi-deployment-microservice/socket"
+	"github.com/byuoitav/flight-deck/handlers"
+	"github.com/byuoitav/flight-deck/socket"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 )

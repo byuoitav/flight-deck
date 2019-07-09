@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/byuoitav/common/log"
-	"github.com/byuoitav/raspi-deployment-microservice/helpers"
+	"github.com/byuoitav/flight-deck/helpers"
 	"github.com/labstack/echo"
 )
 

@@ -19,7 +19,7 @@ import (
 	"github.com/byuoitav/common/structs"
 	"github.com/byuoitav/common/v2/events"
 	"github.com/byuoitav/event-translator-microservice/reporters"
-	"github.com/byuoitav/raspi-deployment-microservice/socket"
+	"github.com/byuoitav/flight-deck/socket"
 	"golang.org/x/crypto/ssh"
 )
 
