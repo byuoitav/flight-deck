@@ -107,13 +107,11 @@ func writeServiceMap(byter *bytes.Buffer, myMap map[string]interface{}, tabCount
 		}
 		s := fmt.Sprintf("%s:", k)
 		byter.WriteString(s)
-		_, ok := v.(string)
-		if ok {
+		if _, ok := v.(string); ok {
 			str := fmt.Sprintf(" %s\n", v)
 			byter.WriteString(str)
 		}
-		_, ok = v.([]interface{})
-		if ok {
+		if _, ok := v.([]interface{}); ok {
 			//If we have environment variables, do the appropriate substitution
 			arrayV := v.([]interface{})
 			if k == "environment" {
@@ -122,18 +120,35 @@ func writeServiceMap(byter *bytes.Buffer, myMap map[string]interface{}, tabCount
 				byter.WriteString("\n")
 
 				for _, listItem := range arrayV {
-					for i := 0; i < tabCount; i++ {
-						byter.WriteString("   ")
+					if _, ok = listItem.(string); ok {
+						for i := 0; i < tabCount; i++ {
+							byter.WriteString("   ")
+						}
+						strVersion := listItem.(string)
+						str := fmt.Sprintf("  - %s\n", strVersion)
+						byter.WriteString(str)
+
+					} else {
+						mapped := listItem.(map[string]string)
+						first := true
+						for mk, mv := range mapped {
+							for i := 0; i < tabCount; i++ {
+								byter.WriteString("   ")
+							}
+							if first {
+								byter.WriteString("  - ")
+							} else {
+								byter.WriteString("   ")
+							}
+							first = false
+							byter.WriteString(fmt.Sprintf("%s: %s\n", mk, mv))
+						}
 					}
-					strVersion := listItem.(string)
-					str := fmt.Sprintf("  - %s\n", strVersion)
-					byter.WriteString(str)
 				}
 			}
 
 		}
-		_, ok = v.(map[string]interface{})
-		if ok {
+		if _, ok := v.(map[string]interface{}); ok {
 			newMap := v.(map[string]interface{})
 			byter.WriteString("\n")
 			writeServiceMap(byter, newMap, (tabCount + 1), service, envMap)
