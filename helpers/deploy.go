@@ -147,7 +147,7 @@ func DeployToDevice(device structs.Device, deviceType, designation string) (Depl
 
 	//Add the docker compose to the scp files
 	toScp = append(toScp, file{
-		Path:        dockerComposeFile + ".tmp",
+		Path:        dockerComposeFile,
 		Permissions: 0644,
 		Bytes:       dockerCompose,
 	})
