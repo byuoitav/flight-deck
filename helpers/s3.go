@@ -103,7 +103,7 @@ func substituteEnvironment(byter *bytes.Buffer, arrayV []interface{}, service st
 func writeServiceMap(byter *bytes.Buffer, myMap map[string]interface{}, tabCount int, service string, envMap map[string]string) error {
 	for k, v := range myMap {
 		for i := 0; i < tabCount; i++ {
-			byter.WriteString("   ")
+			byter.WriteString("  ")
 		}
 		s := fmt.Sprintf("%s:", k)
 		byter.WriteString(s)
@@ -122,23 +122,23 @@ func writeServiceMap(byter *bytes.Buffer, myMap map[string]interface{}, tabCount
 				for _, listItem := range arrayV {
 					if _, ok = listItem.(string); ok {
 						for i := 0; i < tabCount; i++ {
-							byter.WriteString("   ")
+							byter.WriteString("  ")
 						}
 						strVersion := listItem.(string)
 						str := fmt.Sprintf("  - %s\n", strVersion)
 						byter.WriteString(str)
 
 					} else {
-						mapped := listItem.(map[string]string)
+						mapped := listItem.(map[string]interface{})
 						first := true
 						for mk, mv := range mapped {
 							for i := 0; i < tabCount; i++ {
-								byter.WriteString("   ")
+								byter.WriteString("  ")
 							}
 							if first {
 								byter.WriteString("  - ")
 							} else {
-								byter.WriteString("   ")
+								byter.WriteString("    ")
 							}
 							first = false
 							byter.WriteString(fmt.Sprintf("%s: %s\n", mk, mv))
@@ -160,7 +160,7 @@ func writeServiceMap(byter *bytes.Buffer, myMap map[string]interface{}, tabCount
 func writeMap(byter *bytes.Buffer, myMap map[string]interface{}, tabCount int, designation string, deviceType string) error {
 	for k, v := range myMap {
 		for i := 0; i < tabCount; i++ {
-			byter.WriteString("   ")
+			byter.WriteString("  ")
 		}
 		s := fmt.Sprintf("%s:", k)
 		byter.WriteString(s)
@@ -225,7 +225,7 @@ func RetrieveDockerCompose(deviceType, designation string) ([]byte, error) {
 		addMap(m, tempM)
 	}
 	addMap(m, desigDevice.DockerInfo)
-	byter.WriteString("version: '3'\n")
+	byter.WriteString("version: '3.2'\n")
 	byter.WriteString("services:\n")
 	writeMap(&byter, m, 1, designation, deviceType)
 
