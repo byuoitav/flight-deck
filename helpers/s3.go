@@ -50,7 +50,7 @@ func retrieveEnvironmentVariables(deviceType, designation string) (map[string]st
 		return myMap, err
 	}
 	desigDevice := deviceInfo.Designations[designation]
-	for _, service := range desigDevice.Services {
+	for _, service := range desigDevice.DockerServices {
 		resp, err := MakeEnvironmentRequest(service, designation)
 		if err != nil {
 			return myMap, err
@@ -214,7 +214,7 @@ func RetrieveDockerCompose(deviceType, designation string) ([]byte, error) {
 	}
 	desigDevice := deviceInfo.Designations[designation]
 	m := make(map[string]interface{})
-	for _, service := range desigDevice.Services {
+	for _, service := range desigDevice.DockerServices {
 		resp, err := MakeDockerRequest(service, designation)
 		if err != nil {
 			log.L.Warnf("Couldn't get the docker info for %s:%s", service, designation)
