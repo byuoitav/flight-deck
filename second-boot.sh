@@ -14,25 +14,8 @@ until curl http://sandbag.byu.edu:2001/deploy/$(hostname); do
 	echo "trying again..."
 done
 
-touch /tmp/waiting-for-pi-hostname
-
-until [ $PI_HOSTNAME ]; do
-	echo "PI_HOSTNAME not set"
-	source /etc/environment
-	sleep 5 
-done
-
-rm /tmp/waiting-for-pi-hostname
 touch /tmp/got-pi-hostname
 printf "\nrecieved env. variables\n"
-
-# maria db setup
-#until $(curl https://raw.githubusercontent.com/byuoitav/raspi-deployment-microservice/master/mariadb-setup.sh > /tmp/mariadb-setup.sh); do
-#	echo "Trying again."
-#done
-#chmod +x /tmp/mariadb-setup.sh
-
-#/tmp/mariadb-setup.sh
 
 # salt setup
 until $(curl https://raw.githubusercontent.com/byuoitav/raspi-deployment-microservice/master/salt-setup.sh > /tmp/salt-setup.sh); do
@@ -64,4 +47,4 @@ until [ $(docker ps -q | wc -l) -gt 0 ]; do
 	sleep 10
 done
 
-sleep 20
+sleep 30
