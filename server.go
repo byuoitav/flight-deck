@@ -38,10 +38,6 @@ func main() {
 	// TODO new pi endpoint (for showing provision number thing)
 	secure.GET("/newpi", handlers.NewPI)
 
-	//Screenshots
-	router.POST("/screenshot", handlers.GetScreenshot)
-	//secure.GET("/screenshot/:hostname/slack/:channelID", handlers.SendScreenshotToSlack)
-
 	err := router.StartServer(&http.Server{
 		Addr:           port,
 		MaxHeaderBytes: 1024 * 10,
