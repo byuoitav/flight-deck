@@ -272,9 +272,7 @@ func Deploy(address string, output io.Writer, servicesToDeploy []string, files .
 		for _, service := range servicesToDeploy {
 			serviceFile := fmt.Sprintf(`%s.service`, service)
 			serviceFilePath := fmt.Sprintf(`/byu/%s/%s`, service, serviceFile)
-			// systemdFilePath := fmt.Sprintf(`/lib/systemd/system/%s`, serviceFile)
 
-			// fmt.Fprintf(stdin, `cp -f %s %s`+"\n", serviceFilePath, systemdFilePath)
 			fmt.Fprintf(stdin, `systemctl daemon-reload`+"\n")
 			fmt.Fprintf(stdin, `systemctl enable %s`+"\n", serviceFilePath)
 			fmt.Fprintf(stdin, `systemctl stop %s`+"\n", serviceFile)

@@ -10,11 +10,13 @@ import (
 	"github.com/labstack/echo"
 )
 
+//Message .
 type Message struct {
 	ChannelID string `json:"channel_id"`
 	Text      string `json:"text"`
 }
 
+//GetScreenshot .
 func GetScreenshot(context echo.Context) error {
 	log.L.Warnf("[Screenshot] We are entering GetScreenshot!")
 	address := context.Request().RemoteAddr
@@ -62,6 +64,7 @@ func GetScreenshot(context echo.Context) error {
 	return context.JSON(http.StatusOK, "Screenshot confirmed")
 }
 
+//ReceiveScreenshot .
 func ReceiveScreenshot(context echo.Context) error {
 	log.L.Infof("I have entered ReceiveScreenshot")
 	ScreenshotName := context.Param("ScreenshotName")
