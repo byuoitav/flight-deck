@@ -15,11 +15,13 @@ import (
 	"github.com/byuoitav/common/log"
 )
 
+//Attachment .
 type Attachment struct {
 	Title    string `json:"title"`
 	ImageURL string `json:"image_url"`
 }
 
+//Message .
 type Message struct {
 	Token       string       `json:"token"`
 	Channel     string       `json:"channel"`

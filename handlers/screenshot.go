@@ -18,9 +18,9 @@ type Message struct {
 
 //GetScreenshot .
 func GetScreenshot(context echo.Context) error {
-	log.L.Warnf("[Screenshot] We are entering GetScreenshot!")
+	log.L.Debugf("[Screenshot] We are entering GetScreenshot!")
 	address := context.Request().RemoteAddr
-	log.L.Infof(address)
+	log.L.Debugf(address)
 	body, err := ioutil.ReadAll(context.Request().Body)
 	if err != nil {
 		log.L.Warnf("[Screenshot] Failed to read Request body: %s", err.Error())
@@ -62,24 +62,4 @@ func GetScreenshot(context echo.Context) error {
 	log.L.Warnf("[Screenshot] We are exiting GetScreenshot")
 
 	return context.JSON(http.StatusOK, "Screenshot confirmed")
-}
-
-//ReceiveScreenshot .
-func ReceiveScreenshot(context echo.Context) error {
-	log.L.Infof("I have entered ReceiveScreenshot")
-	ScreenshotName := context.Param("ScreenshotName")
-	img, err := ioutil.ReadAll(context.Request().Body)
-	defer context.Request().Body.Close()
-	if err != nil {
-		log.L.Errorf("[Screenshot] Could not read in the screenshot")
-		return context.JSON(http.StatusInternalServerError, err)
-	}
-	//0644 is the OS.FileMode
-	err = ioutil.WriteFile("/tmp/"+ScreenshotName+".xwd", img, 0644)
-	if err != nil {
-		log.L.Errorf("[Screenshot] Could not write out the screenshot")
-		return context.JSON(http.StatusInternalServerError, err)
-	}
-	log.L.Infof("We are finishing receiving the screenshot")
-	return context.JSON(http.StatusOK, "Hooray!")
 }
