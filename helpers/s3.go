@@ -18,12 +18,6 @@ import (
 	mapset "github.com/deckarep/golang-set"
 )
 
-// NumBytes .
-// const NumBytes = 8
-
-// Port .
-// const Port = ":5001" // port the designation microservice works on
-
 var (
 	filePath string
 )
