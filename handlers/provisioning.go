@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo"
 )
 
+//NewPI .
 func NewPI(ctx echo.Context) error {
 	// generate new id for pi
 	id, err := helpers.GenerateRandomString(8)
