@@ -30,9 +30,6 @@ const (
 
 var (
 	sshConfig *ssh.ClientConfig
-	services  = [...]string{
-		"device-monitoring",
-	}
 )
 
 // DeployReport is returned after attempting a deployment
@@ -118,7 +115,7 @@ func DeployByHostname(hostname string) (DeployReport, *nerr.E) {
 
 	log.L.Debugf("Got device %v", device.ID)
 
-	report, er := DeployToDevice(device, device.Type.ID, room.Designation)
+	report, er := DeployToDevice(device, room.Designation)
 	if er != nil {
 		return report, er.Addf("failed to deploy to device %v", device.ID)
 	}
@@ -127,14 +124,14 @@ func DeployByHostname(hostname string) (DeployReport, *nerr.E) {
 }
 
 // DeployToDevice takes a slice of devices and gets all the data it needs to deploy
-func DeployToDevice(device structs.Device, deviceType, designation string) (DeployReport, *nerr.E) {
+func DeployToDevice(device structs.Device, designation string) (DeployReport, *nerr.E) {
 	var report DeployReport
 	var toScp []file
 	var servicesToDeploy []string
 
 	// get docker compose file
 	log.L.Debugf("In DeployToDevice")
-	dockerCompose, err := RetrieveDockerCompose(deviceType, designation)
+	dockerCompose, err := RetrieveDockerCompose(device.Type.ID, designation)
 	if err != nil {
 		return report, nerr.Translate(err).Addf("unable to retrieve docker-compose file: %v", err)
 	}
@@ -147,14 +144,25 @@ func DeployToDevice(device structs.Device, deviceType, designation string) (Depl
 
 	//Add the docker compose to the scp files
 	toScp = append(toScp, file{
-		Path:        dockerComposeFile + ".tmp",
+		Path:        dockerComposeFile,
 		Permissions: 0644,
 		Bytes:       dockerCompose,
 	})
 
+	// device info
+	deviceInfo, err := db.GetDB().GetDeviceDeploymentInfo(device.Type.ID)
+	if err != nil {
+		return report, nerr.Translate(err).Addf("unable to get deployment info for %s", device.Type.ID)
+	}
+
+	config, ok := deviceInfo.Designations[designation]
+	if !ok {
+		return report, nerr.Translate(err).Addf("designation '%s' is not configured for %s", designation, device.Type.ID)
+	}
+
 	// get files for services
-	for _, service := range services {
-		files, serviceFileExists, err := GetServiceFromCouch(service, designation, deviceType, device.ID)
+	for _, service := range config.Services {
+		files, serviceFileExists, err := GetServiceFromCouch(service, designation, device.Type.ID, device.ID)
 		if err != nil {
 			return report, nerr.Translate(err).Addf("unable to get service %v", service)
 		}

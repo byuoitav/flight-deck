@@ -39,7 +39,7 @@ func retrieveEnvironmentVariables(deviceType, designation string) (map[string]st
 		return myMap, err
 	}
 	desigDevice := deviceInfo.Designations[designation]
-	for _, service := range desigDevice.Services {
+	for _, service := range desigDevice.DockerServices {
 		resp, err := MakeEnvironmentRequest(service, designation)
 		if err != nil {
 			return myMap, err
@@ -92,17 +92,15 @@ func substituteEnvironment(byter *bytes.Buffer, arrayV []interface{}, service st
 func writeServiceMap(byter *bytes.Buffer, myMap map[string]interface{}, tabCount int, service string, envMap map[string]string) error {
 	for k, v := range myMap {
 		for i := 0; i < tabCount; i++ {
-			byter.WriteString("   ")
+			byter.WriteString("  ")
 		}
 		s := fmt.Sprintf("%s:", k)
 		byter.WriteString(s)
-		_, ok := v.(string)
-		if ok {
+		if _, ok := v.(string); ok {
 			str := fmt.Sprintf(" %s\n", v)
 			byter.WriteString(str)
 		}
-		_, ok = v.([]interface{})
-		if ok {
+		if _, ok := v.([]interface{}); ok {
 			//If we have environment variables, do the appropriate substitution
 			arrayV := v.([]interface{})
 			if k == "environment" {
@@ -111,21 +109,42 @@ func writeServiceMap(byter *bytes.Buffer, myMap map[string]interface{}, tabCount
 				byter.WriteString("\n")
 
 				for _, listItem := range arrayV {
-					for i := 0; i < tabCount; i++ {
-						byter.WriteString("   ")
+					if _, ok = listItem.(string); ok {
+						for i := 0; i < tabCount; i++ {
+							byter.WriteString("  ")
+						}
+						strVersion := listItem.(string)
+						str := fmt.Sprintf("  - %s\n", strVersion)
+						byter.WriteString(str)
+
+					} else {
+						mapped := listItem.(map[string]interface{})
+						first := true
+						for mk, mv := range mapped {
+							for i := 0; i < tabCount; i++ {
+								byter.WriteString("  ")
+							}
+							if first {
+								byter.WriteString("  - ")
+							} else {
+								byter.WriteString("    ")
+							}
+							first = false
+							byter.WriteString(fmt.Sprintf("%s: %s\n", mk, mv))
+						}
 					}
-					strVersion := listItem.(string)
-					str := fmt.Sprintf("  - %s\n", strVersion)
-					byter.WriteString(str)
 				}
 			}
 
 		}
-		_, ok = v.(map[string]interface{})
-		if ok {
+		if _, ok := v.(map[string]interface{}); ok {
 			newMap := v.(map[string]interface{})
 			byter.WriteString("\n")
-			writeServiceMap(byter, newMap, (tabCount + 1), service, envMap)
+			err := writeServiceMap(byter, newMap, (tabCount + 1), service, envMap)
+			if err != nil {
+				log.L.Warnf("Couldn't write to service map %v", err)
+				return err
+			}
 		}
 	}
 	return nil
@@ -134,7 +153,7 @@ func writeServiceMap(byter *bytes.Buffer, myMap map[string]interface{}, tabCount
 func writeMap(byter *bytes.Buffer, myMap map[string]interface{}, tabCount int, designation string, deviceType string) error {
 	for k, v := range myMap {
 		for i := 0; i < tabCount; i++ {
-			byter.WriteString("   ")
+			byter.WriteString("  ")
 		}
 		s := fmt.Sprintf("%s:", k)
 		byter.WriteString(s)
@@ -164,14 +183,22 @@ func writeMap(byter *bytes.Buffer, myMap map[string]interface{}, tabCount int, d
 
 			resp, err := MakeEnvironmentRequest(k, designation)
 			if err != nil {
+				log.L.Warnf("Couldn't make the enviroment request: %v", err)
 				return err
 			}
 			deviceInfo, err := db.GetDB().GetDeviceDeploymentInfo(deviceType)
+			if err != nil {
+				log.L.Warnf("Couldn't get the device deployment info: %v", err)
+				return err
+			}
 			desigDevice := deviceInfo.Designations[designation]
 			for k, v := range desigDevice.EnvironmentVariables {
 				resp[k] = v
 			}
-			writeServiceMap(byter, newMap, (tabCount + 1), k, resp)
+			err = writeServiceMap(byter, newMap, (tabCount + 1), k, resp)
+			if err != nil {
+				log.L.Warnf("Error writing service map: %v", err)
+			}
 		}
 	}
 	return nil
@@ -188,7 +215,7 @@ func RetrieveDockerCompose(deviceType, designation string) ([]byte, error) {
 	}
 	desigDevice := deviceInfo.Designations[designation]
 	m := make(map[string]interface{})
-	for _, service := range desigDevice.Services {
+	for _, service := range desigDevice.DockerServices {
 		resp, err := MakeDockerRequest(service, designation)
 		if err != nil {
 			log.L.Warnf("Couldn't get the docker info for %s:%s", service, designation)
@@ -199,49 +226,44 @@ func RetrieveDockerCompose(deviceType, designation string) ([]byte, error) {
 		addMap(m, tempM)
 	}
 	addMap(m, desigDevice.DockerInfo)
-	byter.WriteString("version: '3'\n")
+	byter.WriteString("version: '3.2'\n")
 	byter.WriteString("services:\n")
 	writeMap(&byter, m, 1, designation, deviceType)
 
 	return byter.Bytes(), nil
 }
 
-// GetClassAndDesignationID .
-func GetClassAndDesignationID(class, designation string) (int64, int64, error) {
-	if (len(class) == 0) || (len(designation) == 0) {
-		return 0, 0, errors.New("invalid class or designation")
-	}
-
-	//get class ID
-	classID, err := GetClassId(class)
-	if err != nil {
-		msg := fmt.Sprintf("class ID not found: %s", err.Error())
-		//		log.Printf("%s", color.HiRedString("[helpers] %s", msg))
-		return 0, 0, errors.New(msg)
-	}
-
-	//get designation ID
-	desigID, err := GetDesignationId(designation)
-	if err != nil {
-		msg := fmt.Sprintf("designation ID not found: %s", err.Error())
-		//		log.Printf("%s", color.HiRedString("[helpers] %s", msg))
-		return 0, 0, errors.New(msg)
-	}
-
-	return classID, desigID, nil
-}
-
 // MakeEnvironmentRequest .
 func MakeEnvironmentRequest(serviceID, designation string) (map[string]string, error) {
 	resp, err := db.GetDB().GetDeploymentInfo(serviceID)
+	if err != nil {
+		log.L.Warnf("Couldn't get deployment info for %v %v: %v", designation, serviceID, err)
+		return nil, err
+	}
+	if _, ok := resp.CampusConfig[designation]; !ok {
+		return nil, fmt.Errorf("Designation doesn't exist for %v %v", designation, serviceID)
+	}
 	toReturn := resp.CampusConfig[designation].EnvironmentVariables
-	return toReturn, err
+	if toReturn == nil {
+		return nil, fmt.Errorf("Environment Variables empty for %v %v", designation, serviceID)
+	}
+	return toReturn, nil
 }
 
 // MakeDockerRequest .
 func MakeDockerRequest(serviceID, designation string) (map[string]interface{}, error) {
 	resp, err := db.GetDB().GetDeploymentInfo(serviceID)
+	if err != nil {
+		log.L.Warnf("Couldn't get deployment info for %v %v: %v", designation, serviceID, err)
+		return nil, err
+	}
+	if _, ok := resp.CampusConfig[designation]; !ok {
+		return nil, fmt.Errorf("Designation doesn't exist for %v %v", designation, serviceID)
+	}
 	toReturn := resp.CampusConfig[designation].DockerInfo
+	if toReturn == nil {
+		return nil, fmt.Errorf("Dockerinfo empty for %v %v", designation, serviceID)
+	}
 	return toReturn, err
 }
 

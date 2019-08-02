@@ -27,10 +27,6 @@ func main() {
 	/* secure routes */
 	// deployment
 	secure.GET("/webhook_device/:hostname", handlers.DeployByHostname)
-	//Unsupported Now
-	/*	secure.GET("/webhook/:type/:designation", handlers.DeployByTypeAndDesignation)
-		secure.GET("/webhook_building/:building/:type/:designation", handlers.DeployByBuildingAndTypeAndDesignation)
-	*/
 
 	// divider sensor contacts enable/disable
 	secure.GET("/webhook_contacts/enable/:hostname", handlers.EnableContacts)
@@ -41,11 +37,6 @@ func main() {
 
 	// TODO new pi endpoint (for showing provision number thing)
 	secure.GET("/newpi", handlers.NewPI)
-
-	//Screenshots
-	router.POST("/screenshot", handlers.GetScreenshot)
-	//secure.GET("/screenshot/:hostname/slack/:channelID", handlers.SendScreenshotToSlack)
-	router.POST("/ReceiveScreenshot/:ScreenshotName", handlers.ReceiveScreenshot)
 
 	err := router.StartServer(&http.Server{
 		Addr:           port,
