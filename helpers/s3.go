@@ -146,7 +146,11 @@ func writeServiceMap(byter *bytes.Buffer, myMap map[string]interface{}, tabCount
 		if _, ok := v.(map[string]interface{}); ok {
 			newMap := v.(map[string]interface{})
 			byter.WriteString("\n")
-			writeServiceMap(byter, newMap, (tabCount + 1), service, envMap)
+			err := writeServiceMap(byter, newMap, (tabCount + 1), service, envMap)
+			if err != nil {
+				log.L.Warnf("Couldn't write to service map %v", err)
+				return err
+			}
 		}
 	}
 	return nil
@@ -185,14 +189,22 @@ func writeMap(byter *bytes.Buffer, myMap map[string]interface{}, tabCount int, d
 
 			resp, err := MakeEnvironmentRequest(k, designation)
 			if err != nil {
+				log.L.Warnf("Couldn't make the enviroment request: %v", err)
 				return err
 			}
 			deviceInfo, err := db.GetDB().GetDeviceDeploymentInfo(deviceType)
+			if err != nil {
+				log.L.Warnf("Couldn't get the device deployment info: %v", err)
+				return err
+			}
 			desigDevice := deviceInfo.Designations[designation]
 			for k, v := range desigDevice.EnvironmentVariables {
 				resp[k] = v
 			}
-			writeServiceMap(byter, newMap, (tabCount + 1), k, resp)
+			err = writeServiceMap(byter, newMap, (tabCount + 1), k, resp)
+			if err != nil {
+				log.L.Warnf("Error writing service map: %v", err)
+			}
 		}
 	}
 	return nil
@@ -230,14 +242,34 @@ func RetrieveDockerCompose(deviceType, designation string) ([]byte, error) {
 // MakeEnvironmentRequest .
 func MakeEnvironmentRequest(serviceID, designation string) (map[string]string, error) {
 	resp, err := db.GetDB().GetDeploymentInfo(serviceID)
+	if err != nil {
+		log.L.Warnf("Couldn't get deployment info for %v %v: %v", designation, serviceID, err)
+		return nil, err
+	}
+	if _, ok := resp.CampusConfig[designation]; !ok {
+		return nil, fmt.Errorf("Designation doesn't exist for %v %v", designation, serviceID)
+	}
 	toReturn := resp.CampusConfig[designation].EnvironmentVariables
-	return toReturn, err
+	if toReturn == nil {
+		return nil, fmt.Errorf("Environment Variables empty for %v %v", designation, serviceID)
+	}
+	return toReturn, nil
 }
 
 // MakeDockerRequest .
 func MakeDockerRequest(serviceID, designation string) (map[string]interface{}, error) {
 	resp, err := db.GetDB().GetDeploymentInfo(serviceID)
+	if err != nil {
+		log.L.Warnf("Couldn't get deployment info for %v %v: %v", designation, serviceID, err)
+		return nil, err
+	}
+	if _, ok := resp.CampusConfig[designation]; !ok {
+		return nil, fmt.Errorf("Designation doesn't exist for %v %v", designation, serviceID)
+	}
 	toReturn := resp.CampusConfig[designation].DockerInfo
+	if toReturn == nil {
+		return nil, fmt.Errorf("Dockerinfo empty for %v %v", designation, serviceID)
+	}
 	return toReturn, err
 }
 
