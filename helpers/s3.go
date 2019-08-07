@@ -375,13 +375,14 @@ func GetCouchServiceFiles(service, designation, deviceType, deviceID string) (ma
 	writeServiceTemplate(&byter, serviceConfig, deviceType, designation, deviceID)
 	objects[fmt.Sprintf("%v.service", service)] = byter.Bytes()
 
-	//Handle Binary
+	/*//Handle Binary
 	binary, err := db.GetDB().GetServiceAttachment(service, designation)
 	if err != nil {
 		log.L.Warnf("Couldn't get the binary from couch for %v-%v: %v", service, designation, err)
 		return objects, err
 	}
 	objects[fmt.Sprintf("%v", service)] = binary
+	*/
 
 	//Handle Zipped Files
 	zippy, err := db.GetDB().GetServiceZip(service, designation)
