@@ -130,7 +130,6 @@ func DeployToDevice(device structs.Device, designation string) (DeployReport, *n
 	var servicesToDeploy []string
 
 	// get docker compose file
-	log.L.Debugf("In DeployToDevice")
 	dockerCompose, err := RetrieveDockerCompose(device.Type.ID, designation)
 	if err != nil {
 		return report, nerr.Translate(err).Addf("unable to retrieve docker-compose file: %v", err)
@@ -175,6 +174,9 @@ func DeployToDevice(device structs.Device, designation string) (DeployReport, *n
 	}
 
 	report = Deploy(device.Address, socket.Writer(device.Address), servicesToDeploy, toScp...)
+	if !report.Success {
+		return report, nerr.Createf("error", report.Message)
+	}
 
 	return report, nil
 }
