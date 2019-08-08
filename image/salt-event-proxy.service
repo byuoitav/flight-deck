@@ -1,5 +1,5 @@
 [Unit]
-Description=Proxy for local actions that need permissions outside of docker 
+Description=Proxy for local actions that need permissions outside of docker
 After=network.target
 
 [Service]

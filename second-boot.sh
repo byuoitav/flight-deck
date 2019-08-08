@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/bash
 
 echo "Second boot."
 
@@ -10,7 +10,7 @@ echo "Added user pi to the docker group"
 
 # get environment variables
 echo "getting environment variables..."
-until curl http://sandbag.byu.edu:2001/deploy/$(hostname); do 
+until curl http://sandbag.byu.edu:2001/deploy/$(hostname); do
 	echo "trying again..."
 done
 
@@ -18,7 +18,7 @@ touch /tmp/got-pi-hostname
 printf "\nrecieved env. variables\n"
 
 # salt setup
-until $(curl https://raw.githubusercontent.com/byuoitav/raspi-deployment-microservice/master/salt-setup.sh > /tmp/salt-setup.sh); do
+until $(curl https://raw.githubusercontent.com/byuoitav/flight-deck/master/salt-setup.sh > /tmp/salt-setup.sh); do
 	echo "Trying again."
 done
 chmod +x /tmp/salt-setup.sh
@@ -29,7 +29,7 @@ until [ -f "/etc/salt/setup" ]; do
 done
 
 # make system read only on next boot, and download toggle script
-until $(curl https://raw.githubusercontent.com/byuoitav/raspi-deployment-microservice/master/togglero > /usr/local/bin/togglero); do
+until $(curl https://raw.githubusercontent.com/byuoitav/flight-deck/master/togglero > /usr/local/bin/togglero); do
 	echo "Trying to download togglero again."
     sleep 5
 done
@@ -41,7 +41,7 @@ chmod +x /usr/local/bin/togglero
 #make sure the docker-service is enabled
 sudo systemctl enable docker
 
-# docker 
+# docker
 until [ $(docker ps -q | wc -l) -gt 0 ]; do
 	echo "Waiting for docker containers to download"
 	sleep 10

@@ -10,7 +10,7 @@ echo "\n\nmy ip address: $ip\n\n"
 date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 
 # Fix the keyboard layout
-curl https://raw.githubusercontent.com/byuoitav/raspi-deployment-microservice/master/files/keyboard > /etc/default/keyboard
+curl https://raw.githubusercontent.com/byuoitav/flight-deck/master/files/keyboard > /etc/default/keyboard
 
 while  true ; do
     # get hostname
@@ -67,7 +67,7 @@ echo "$routers.1" >> /etc/dhcpcd.conf
 echo "static domain_name_servers=10.8.0.19 10.8.0.26" >> /etc/dhcpcd.conf
 
 # set up screenshutoff
-curl https://raw.githubusercontent.com/byuoitav/raspi-deployment-microservice/master/screenshutoff-setup.sh > /tmp/sss-setup.sh
+curl https://raw.githubusercontent.com/byuoitav/flight-deck/master/screenshutoff-setup.sh > /tmp/sss-setup.sh
 chmod +x /tmp/sss-setup.sh
 sh -c "bash /tmp/sss-setup.sh"
 
@@ -84,7 +84,7 @@ pip install docker-compose
 
 # Configure automatic login for the `pi` user
 mkdir -pv /etc/systemd/system/getty@tty1.service.d/
-curl https://raw.githubusercontent.com/byuoitav/raspi-deployment-microservice/master/files/autologin.conf > /etc/systemd/system/getty@tty1.service.d/autologin.conf
+curl https://raw.githubusercontent.com/byuoitav/flight-deck/master/files/autologin.conf > /etc/systemd/system/getty@tty1.service.d/autologin.conf
 systemctl enable getty@tty1.service
 
 # Enable SSH connections
@@ -94,7 +94,7 @@ touch /boot/ssh
 usermod -aG sudo pi
 
 # set to update from byu servers
-curl https://raw.githubusercontent.com/byuoitav/raspi-deployment-microservice/master/files/ntp.conf > /etc/ntp.conf
+curl https://raw.githubusercontent.com/byuoitav/flight-deck/master/files/ntp.conf > /etc/ntp.conf
 apt -y install ntpdate
 systemctl stop ntp
 ntpdate-debian
