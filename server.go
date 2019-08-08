@@ -14,9 +14,6 @@ func main() {
 	port := ":8008"
 	router := common.NewRouter()
 
-	// unautheticated routes
-	router.Static("/*", "public")
-
 	secure := router.Group("", echo.WrapMiddleware(authmiddleware.Authenticate))
 
 	/* secure routes */

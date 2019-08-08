@@ -11,7 +11,5 @@ COPY ${name}-bin ${name}-bin
 COPY version.txt version.txt
 
 # add any required files/folders here
-run mkdir /public
-COPY /public /public
 
 ENTRYPOINT ./${name}-bin
