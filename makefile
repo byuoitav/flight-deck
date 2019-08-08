@@ -34,22 +34,22 @@ UNAME=$(shell echo $(DOCKER_USERNAME))
 EMAIL=$(shell echo $(DOCKER_EMAIL))
 PASS=$(shell echo $(DOCKER_PASSWORD))
 
-build: build-x86 
+build: build-x86
 
 build-x86:
 	env GOOS=linux CGO_ENABLED=0 $(GOBUILD) -o $(NAME)-bin -v
 
-test: 
-	$(GOTEST) -v -race $(go list ./... | grep -v /vendor/) 
+test:
+	$(GOTEST) -v -race $(go list ./... | grep -v /vendor/)
 
-clean: 
+clean:
 	$(GOCLEAN)
 	rm -f $(NAME)-bin
 
 run: $(NAME)-bin
 	./$(NAME)-bin
 
-deps: 
+deps:
 	$(GOGET) -d -v
 ifneq "$(BRANCH)" "master"
 	# put vendored packages in here
@@ -64,10 +64,16 @@ docker-x86: $(NAME)-bin
 ifeq "$(BRANCH)" "master"
 	$(eval BRANCH=development)
 endif
+ifeq "$(BRANCH)" "production"
+	$(eval BRANCH=latest)
+endif
 	$(DOCKER_BUILD) --build-arg NAME=$(NAME) -f $(DOCKER_FILE) -t $(ORG)/$(NAME):$(BRANCH) .
 	@echo logging in to dockerhub...
 	@$(DOCKER_LOGIN)
 	$(DOCKER_PUSH) $(ORG)/$(NAME):$(BRANCH)
+ifeq "$(BRANCH)" "latest"
+	$(eval BRANCH=production)
+endif
 ifeq "$(BRANCH)" "development"
 	$(eval BRANCH=master)
 endif
