@@ -1,11 +1,12 @@
 package helpers
 
 import (
-	"archive/zip"
+	"archive/tar"
 	"bytes"
+	"compress/gzip"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -351,15 +352,6 @@ func writeServiceTemplate(byter *bytes.Buffer, serviceConfig structs.ServiceConf
 	return nil
 }
 
-func readZipFile(zf *zip.File) ([]byte, error) {
-	f, err := zf.Open()
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-	return ioutil.ReadAll(f)
-}
-
 // GetCouchServiceFiles .
 func GetCouchServiceFiles(service, designation, deviceType, deviceID string) (map[string][]byte, error) {
 	objects := make(map[string][]byte)
@@ -375,35 +367,53 @@ func GetCouchServiceFiles(service, designation, deviceType, deviceID string) (ma
 	writeServiceTemplate(&byter, serviceConfig, deviceType, designation, deviceID)
 	objects[fmt.Sprintf("%v.service", service)] = byter.Bytes()
 
-	//Handle Binary
+	/*//Handle Binary
 	binary, err := db.GetDB().GetServiceAttachment(service, designation)
 	if err != nil {
 		log.L.Warnf("Couldn't get the binary from couch for %v-%v: %v", service, designation, err)
 		return objects, err
 	}
 	objects[fmt.Sprintf("%v", service)] = binary
+	*/
 
-	//Handle Zipped Files
-	zippy, err := db.GetDB().GetServiceZip(service, designation)
+	//Handle tar.gz
+	tarball, err := db.GetDB().GetServiceZip(service, designation)
 	if err != nil {
-		log.L.Warnf("Couldn't get the zip file from couch: %v", err)
-		return objects, err
-	}
-	zipReader, err := zip.NewReader(bytes.NewReader(zippy), int64(len(zippy)))
-	if err != nil {
-		log.L.Warnf("Couldn't open zip reader: %v", err)
+		log.L.Warnf("Couldn't get the tarball from couch: %v", err)
 		return objects, err
 	}
 
-	// Read all the files from zip archive
-	for _, zipFile := range zipReader.File {
-		log.L.Infof("Reading file: %v", zipFile.Name)
-		unzippedFileBytes, err := readZipFile(zipFile)
+	gzf, err := gzip.NewReader(bytes.NewReader(tarball))
+	if err != nil {
+		log.L.Warnf("Coudn't make gzip reader for %v: %v", service, err)
+		return nil, err
+	}
+
+	tr := tar.NewReader(gzf)
+
+	// Read all the files from archive
+	for {
+		header, err := tr.Next()
+		if err == io.EOF {
+			break
+		}
 		if err != nil {
-			log.L.Warnf("Couldn't read zipped file: %v, %v", zipFile.Name, err)
+			log.L.Warnf("Couldn't read file: %v", err)
 			continue
 		}
-		objects[zipFile.Name] = unzippedFileBytes
+		log.L.Debugf("Reading file: %v", header.Name)
+
+		switch header.Typeflag {
+		case tar.TypeDir:
+			continue
+		case tar.TypeReg:
+			data := make([]byte, header.Size)
+			_, err := tr.Read(data)
+			if err != nil {
+				log.L.Warnf("Couldn't read the bytes of %v: %v", header.Name, data)
+			}
+			objects[header.Name] = data
+		}
 
 	}
 
