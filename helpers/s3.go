@@ -390,20 +390,26 @@ func GetCouchServiceFiles(service, designation, deviceType, deviceID string) (ma
 		}
 		if err != nil {
 			log.L.Warnf("Couldn't read file: %v", err)
-			continue
+			break
 		}
+
 		log.L.Debugf("Reading file: %v", header.Name)
 
 		switch header.Typeflag {
 		case tar.TypeDir:
 			continue
 		case tar.TypeReg:
-			data := make([]byte, header.Size)
-			_, err := tr.Read(data)
-			if err != nil {
-				log.L.Warnf("Couldn't read the bytes of %v: %v", header.Name, data)
+			buf := &bytes.Buffer{}
+
+			n, err := io.Copy(buf, tr)
+			switch {
+			case err != nil:
+				log.L.Warnf("unable to read the bytes of %v: %v\n", header.Name)
+			case n != header.Size:
+				log.L.Warnf("failed to read all bytes of %v: read %v, expected %v", header.Name, n, header.Size)
 			}
-			objects[header.Name] = data
+
+			objects[header.Name] = buf.Bytes()
 		}
 
 	}
