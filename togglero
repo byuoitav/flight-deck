@@ -45,7 +45,7 @@ make_ro() {
 
 make_rw() {
     echo -en "making system writable..."
-    
+
     # remove all ro flags
     sed -i -E 's/(,ro)|(ro)//' $fstab
 
@@ -85,7 +85,7 @@ while getopts "n" opt; do
     esac
 done
 
-case "$1" in 
+case "$1" in
     on)
         fail_unless_root
         setup_for_change

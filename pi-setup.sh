@@ -15,10 +15,6 @@ sudo sh -c "bash /tmp/sudo.sh"
 curl https://raw.githubusercontent.com/byuoitav/raspi-deployment-microservice/master/files/xinitrc > /home/pi/.xinitrc
 chmod +x /home/pi/.xinitrc
 
-# Download the script necessary to update Docker containers after a reboot
-curl https://raw.githubusercontent.com/byuoitav/raspi-deployment-microservice/master/files/update_docker_containers.sh > /home/pi/update_docker_containers.sh
-chmod +x /home/pi/update_docker_containers.sh
-
 #Download the changeroom script
 curl https://raw.githubusercontent.com/byuoitav/raspi-deployment-microservice/master/changeroom.sh > /home/pi/changeroom.sh
 chmod +x /home/pi/changeroom.sh
@@ -34,5 +30,5 @@ if [ -f "$started" ]; then
 	echo "Removing first boot file."
 	sudo rm $bootfile
 fi
-	
+
 sudo sh -c "reboot"

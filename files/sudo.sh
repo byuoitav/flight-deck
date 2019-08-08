@@ -12,9 +12,7 @@ date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' 
 # Fix the keyboard layout
 curl https://raw.githubusercontent.com/byuoitav/raspi-deployment-microservice/master/files/keyboard > /etc/default/keyboard
 
-
 while  true ; do
-
     # get hostname
     echo "Type the desired hostname of this device (E.g. ITB-1006-CP2), followed by [ENTER]:"
     read -e desired_hostname
@@ -29,7 +27,6 @@ while  true ; do
 done
 
 while true; do
-
     # get static ip
     echo "Type the desired static ip-address of this device (e.g. $ip), followed by [ENTER]:"
     read -e desired_ip
@@ -68,13 +65,6 @@ echo "static ip_address=$desired_ip/24" >> /etc/dhcpcd.conf
 routers=$(echo "static routers=$desired_ip" | cut -d "." -f -3)
 echo "$routers.1" >> /etc/dhcpcd.conf
 echo "static domain_name_servers=10.8.0.19 10.8.0.26" >> /etc/dhcpcd.conf
-
-# set contact points up
-curl https://raw.githubusercontent.com/byuoitav/raspi-deployment-microservice/master/image/contacts.service > /usr/lib/systemd/system/contacts.service
-chmod 664 /usr/lib/systemd/system/contacts.service
-curl https://raw.githubusercontent.com/byuoitav/raspi-deployment-microservice/master/contacts.py > /usr/bin/contacts.py
-chmod 775 /usr/bin/contacts.py
-systemctl daemon-reload
 
 # set up screenshutoff
 curl https://raw.githubusercontent.com/byuoitav/raspi-deployment-microservice/master/screenshutoff-setup.sh > /tmp/sss-setup.sh
