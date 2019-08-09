@@ -10,11 +10,9 @@ echo "\n\nmy ip address: $ip\n\n"
 date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 
 # Fix the keyboard layout
-curl https://raw.githubusercontent.com/byuoitav/raspi-deployment-microservice/master/files/keyboard > /etc/default/keyboard
-
+curl https://raw.githubusercontent.com/byuoitav/flight-deck/master/files/keyboard > /etc/default/keyboard
 
 while  true ; do
-
     # get hostname
     echo "Type the desired hostname of this device (E.g. ITB-1006-CP2), followed by [ENTER]:"
     read -e desired_hostname
@@ -29,7 +27,6 @@ while  true ; do
 done
 
 while true; do
-
     # get static ip
     echo "Type the desired static ip-address of this device (e.g. $ip), followed by [ENTER]:"
     read -e desired_ip
@@ -69,15 +66,8 @@ routers=$(echo "static routers=$desired_ip" | cut -d "." -f -3)
 echo "$routers.1" >> /etc/dhcpcd.conf
 echo "static domain_name_servers=10.8.0.19 10.8.0.26" >> /etc/dhcpcd.conf
 
-# set contact points up
-curl https://raw.githubusercontent.com/byuoitav/raspi-deployment-microservice/master/image/contacts.service > /usr/lib/systemd/system/contacts.service
-chmod 664 /usr/lib/systemd/system/contacts.service
-curl https://raw.githubusercontent.com/byuoitav/raspi-deployment-microservice/master/contacts.py > /usr/bin/contacts.py
-chmod 775 /usr/bin/contacts.py
-systemctl daemon-reload
-
 # set up screenshutoff
-curl https://raw.githubusercontent.com/byuoitav/raspi-deployment-microservice/master/screenshutoff-setup.sh > /tmp/sss-setup.sh
+curl https://raw.githubusercontent.com/byuoitav/flight-deck/master/screenshutoff-setup.sh > /tmp/sss-setup.sh
 chmod +x /tmp/sss-setup.sh
 sh -c "bash /tmp/sss-setup.sh"
 
@@ -94,7 +84,7 @@ pip install docker-compose
 
 # Configure automatic login for the `pi` user
 mkdir -pv /etc/systemd/system/getty@tty1.service.d/
-curl https://raw.githubusercontent.com/byuoitav/raspi-deployment-microservice/master/files/autologin.conf > /etc/systemd/system/getty@tty1.service.d/autologin.conf
+curl https://raw.githubusercontent.com/byuoitav/flight-deck/master/files/autologin.conf > /etc/systemd/system/getty@tty1.service.d/autologin.conf
 systemctl enable getty@tty1.service
 
 # Enable SSH connections
@@ -104,7 +94,7 @@ touch /boot/ssh
 usermod -aG sudo pi
 
 # set to update from byu servers
-curl https://raw.githubusercontent.com/byuoitav/raspi-deployment-microservice/master/files/ntp.conf > /etc/ntp.conf
+curl https://raw.githubusercontent.com/byuoitav/flight-deck/master/files/ntp.conf > /etc/ntp.conf
 apt -y install ntpdate
 systemctl stop ntp
 ntpdate-debian

@@ -24,7 +24,7 @@ printf "\nType the new static ip-address of this device (e.g. 10.5.99.18), follo
 read -e new_ip
 
 # update hostname
-echo $new_hostname > /etc/hostname 
+echo $new_hostname > /etc/hostname
 head -n -1 /etc/hosts > temp.txt && mv temp.txt /etc/hosts
 echo "127.0.1.1      $new_hostname" >> /etc/hosts
 

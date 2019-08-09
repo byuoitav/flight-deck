@@ -15,7 +15,7 @@ def getPort():
             fi.close()
             try:
                 res = portre.findall(txt)
-                if len(res) > 0: 
+                if len(res) > 0:
                     return res[0][0]
             except:
                 continue
@@ -64,7 +64,7 @@ for i in toCheck:
                 if args.loc:
                     print(r[4] , " - " , os.path.join(i,f))
                 envVars.add(r[4])
-        
+
 
 print(envVars)
 configPath = os.path.join(os.getcwd(), "config.json")
@@ -87,4 +87,3 @@ else: #We need to build it
     fi = open(configPath, 'w')
     fi.write(json.dumps(data, indent=4))
     fi.close()
-

@@ -14,7 +14,7 @@ if [ -f "$resizefile" ]; then
     echo "0th boot. resizing /var partition"
     sleep 3
 
-	until $(curl https://raw.githubusercontent.com/byuoitav/raspi-deployment-microservice/master/image/resizevar > /tmp/resizevar); do
+	until $(curl https://raw.githubusercontent.com/byuoitav/flight-deck/master/image/resizevar > /tmp/resizevar); do
 		echo "Downloading resize script"
 	done
 	chmod +x /tmp/resizevar
@@ -29,13 +29,13 @@ if [ -f "$bootfile" ]; then
 	echo "First boot."
 
 	# download pi-setup script
-	until $(curl https://raw.githubusercontent.com/byuoitav/raspi-deployment-microservice/master/pi-setup.sh > /tmp/pi-setup.sh); do
+	until $(curl https://raw.githubusercontent.com/byuoitav/flight-deck/master/pi-setup.sh > /tmp/pi-setup.sh); do
 		echo "Trying again."
 	done
 	chmod +x /tmp/pi-setup.sh
 
 	/tmp/pi-setup.sh
-	
+
 else
 	sleep 30
 	sudo chvt 2
@@ -43,7 +43,7 @@ else
 	echo "Second boot."
 
 	# download second-boot script
-	until $(curl https://raw.githubusercontent.com/byuoitav/raspi-deployment-microservice/master/second-boot.sh > /tmp/second-boot.sh); do
+	until $(curl https://raw.githubusercontent.com/byuoitav/flight-deck/master/second-boot.sh > /tmp/second-boot.sh); do
 		echo "Trying again."
 	done
 	chmod +x /tmp/second-boot.sh

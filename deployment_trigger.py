@@ -28,9 +28,9 @@ class RequestHandler(BaseHTTPRequestHandler):
             print 'headers:', headers
 
             response = requests.get(url, headers=headers)
-            
+
             if response.status_code != 200:
-                msg = 'non-200 response: %f' % response.status_code 
+                msg = 'non-200 response: %f' % response.status_code
                 cprint(msg, 'red', attrs=['bold'], file=sys.stderr)
                 request.send_response(500)
                 request.end_headers()
@@ -39,12 +39,12 @@ class RequestHandler(BaseHTTPRequestHandler):
 
             result = json.loads(response.text)
             print result['response']
-                    
+
 
             request.send_response(200)
             request.end_headers()
             request.wfile.write("successfully triggered deployment")
-    
+
         else:
             request.send_response(400)
             request.end_headers()
@@ -59,6 +59,3 @@ msg = colored(str(PORT), 'green', attrs=['bold'])
 print 'HTTP server started on port', msg
 
 server.serve_forever();
-
-
-

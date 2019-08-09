@@ -34,22 +34,22 @@ UNAME=$(shell echo $(DOCKER_USERNAME))
 EMAIL=$(shell echo $(DOCKER_EMAIL))
 PASS=$(shell echo $(DOCKER_PASSWORD))
 
-build: build-x86 
+build: build-x86
 
 build-x86:
 	env GOOS=linux CGO_ENABLED=0 $(GOBUILD) -o $(NAME)-bin -v
 
-test: 
-	$(GOTEST) -v -race $(go list ./... | grep -v /vendor/) 
+test:
+	$(GOTEST) -v -race $(go list ./... | grep -v /vendor/)
 
-clean: 
+clean:
 	$(GOCLEAN)
 	rm -f $(NAME)-bin
 
 run: $(NAME)-bin
 	./$(NAME)-bin
 
-deps: 
+deps:
 	$(GOGET) -d -v
 ifneq "$(BRANCH)" "master"
 	# put vendored packages in here
