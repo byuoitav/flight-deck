@@ -57,6 +57,8 @@ cp /etc/dhcpcd.conf /etc/dhcpcd.conf.other
 
 # setup hostname
 echo $desired_hostname > /etc/hostname
+echo "export PI_HOSTNAME=$desired_hostname" >> /etc/environment
+echo "export SYSTEM_ID=$desired_hostname" >> /etc/enviroment
 echo "127.0.1.1    $desired_hostname" >> /etc/hosts
 
 # setup static ip
