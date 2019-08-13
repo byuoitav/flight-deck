@@ -87,7 +87,6 @@ func substituteEnvironment(byter *bytes.Buffer, arrayV []interface{}, service st
 			return fmt.Errorf("Values too short (did you forget a $ in the environment values?)")
 		}
 		str := fmt.Sprintf("  - %s=%s\n", values[0], envMap[values[1]])
-		//		str := fmt.Sprintf("\t- %s=%s\n", values[0], values[1])
 		byter.WriteString(str)
 	}
 	return nil
