@@ -156,7 +156,7 @@ func DeployToDevice(device structs.Device, designation string) (DeployReport, *n
 
 	config, ok := deviceInfo.Designations[designation]
 	if !ok {
-		return report, nerr.Translate(err).Addf("designation '%s' is not configured for %s", designation, device.Type.ID)
+		return report, nerr.Createf("error", "designation '%s' is not configured for %s", designation, device.Type.ID)
 	}
 
 	//Add the environment file
