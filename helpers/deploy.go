@@ -159,6 +159,18 @@ func DeployToDevice(device structs.Device, designation string) (DeployReport, *n
 		return report, nerr.Translate(err).Addf("designation '%s' is not configured for %s", designation, device.Type.ID)
 	}
 
+	//Add the environment file
+	var envByter bytes.Buffer
+	for k, v := range config.EnvironmentVariables {
+		envByter.WriteString(fmt.Sprintf("%v=%v\n", k, v))
+	}
+
+	toScp = append(toScp, file{
+		Path:        envVarsFile,
+		Permissions: 0644,
+		Bytes:       envByter.Bytes(),
+	})
+
 	// get files for services
 	for _, service := range config.Services {
 		files, serviceFileExists, err := GetServiceFromCouch(service, designation, device.Type.ID, device.ID)

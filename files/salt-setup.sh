@@ -10,7 +10,7 @@ wget https://raw.githubusercontent.com/byuoitav/flight-deck/master/files/minion
 
 sed -i 's/\$SALT_MASTER_HOST/'$SALT_MASTER_HOST'/' minion
 sed -i 's/\$SALT_MASTER_FINGER/'$SALT_MASTER_FINGER'/' minion
-sed -i 's/\$PI_HOSTNAME/'$PI_HOSTNAME'/' minion #
+sed -i 's/\$SYSTEM_ID/'$SYSTEM_ID'/' minion
 
 sudo mv minion /etc/salt/minion
 
