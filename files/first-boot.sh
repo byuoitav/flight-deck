@@ -11,21 +11,6 @@ curl https://raw.githubusercontent.com/byuoitav/flight-deck/master/files/sudo.sh
 chmod +x /tmp/sudo.sh
 sudo sh -c "bash /tmp/sudo.sh"
 
-# Make `startx` result in starting the i3 window manager
-curl https://raw.githubusercontent.com/byuoitav/flight-deck/master/files/xinitrc > /home/pi/.xinitrc
-chmod +x /home/pi/.xinitrc
-
-#Download the changeroom script
-curl https://raw.githubusercontent.com/byuoitav/flight-deck/master/changeroom.sh > /home/pi/changeroom.sh
-chmod +x /home/pi/changeroom.sh
-
-# Configure i3
-mkdir /home/pi/.i3
-curl https://raw.githubusercontent.com/byuoitav/flight-deck/master/files/i3_config > /home/pi/.i3/config
-
-# Make X start on login
-curl https://raw.githubusercontent.com/byuoitav/flight-deck/master/files/bash_profile > /home/pi/.bash_profile
-
 if [ -f "$started" ]; then
 	echo "Removing first boot file."
 	sudo rm $bootfile
