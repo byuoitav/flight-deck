@@ -9,9 +9,6 @@ echo "\n\nmy ip address: $ip\n\n"
 # Update the time (from google, to ensure https works)
 date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 
-# Fix the keyboard layout
-curl https://raw.githubusercontent.com/byuoitav/flight-deck/master/files/keyboard > /etc/default/keyboard
-
 while  true ; do
     # get hostname
     echo "Type the desired hostname of this device (E.g. ITB-1006-CP2), followed by [ENTER]:"
