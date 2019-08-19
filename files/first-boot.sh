@@ -15,6 +15,7 @@ fi
 # start
 touch $started
 
+# print out current IP address
 ip=`ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1  -d'/'`
 echo "\n\nmy ip address: $ip\n\n"
 
@@ -22,7 +23,7 @@ echo "\n\nmy ip address: $ip\n\n"
 date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 
 # get the desired hostname
-while  true ; do
+while true; do
     # get hostname
     echo "Type the desired hostname of this device (E.g. ITB-1006-CP1), followed by [ENTER]:"
     read -e desired_hostname
@@ -36,7 +37,7 @@ while  true ; do
     fi
 done
 
-# get the desired
+# get the desired ip address
 while true; do
     # get static ip
     echo "Type the desired static ip-address of this device (e.g. $ip), followed by [ENTER]:"
@@ -56,7 +57,7 @@ cp /etc/dhcpcd.conf /etc/dhcpcd.conf.other
 
 # setup hostname
 echo $desired_hostname > /etc/hostname
-echo "127.0.1.1    $desired_hostname" >> /etc/hosts
+echo "127.0.0.1     $desired_hostname" >> /etc/hosts
 
 # setup static ip
 echo "interface eth0" >> /etc/dhcpcd.conf
@@ -67,6 +68,12 @@ echo "static domain_name_servers=127.0.0.1 10.8.0.19 10.8.0.26" >> /etc/dhcpcd.c
 
 # overwrite resolv.conf
 echo "nameserver 127.0.0.1" > /etc/resolv.conf
+
+# update the pi
+apt update
+apt -y upgrade
+apt -y autoremove
+apt - y autoclean
 
 rm $bootfile
 reboot

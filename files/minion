@@ -11,14 +11,6 @@
 master: $SALT_MASTER_HOST
 master_finger: $SALT_MASTER_FINGER # Set http proxy information for the minion when doing requests
 
-# TODO set SYSTEM_ID in /etc/salt/minion_id, and remove this line
-# Explicitly declare the id for this minion to use, if left commented the id
-# will be the hostname as returned by the python call: socket.getfqdn()
-# Since salt uses detached ids it is possible to run multiple minions on the
-# same machine but with different ids, this can be useful for salt compute
-# clusters.
-id: $SYSTEM_ID
-
 #
 # Run states when the minion daemon starts. To enable, set startup_states to:
 # 'highstate' -- Execute state.highstate

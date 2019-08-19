@@ -2,28 +2,30 @@
 
 echo "Second boot."
 
-# get environment variables
-echo "getting environment variables..."
-until curl http://sandbag.byu.edu:2001/deploy/$(hostname); do
-	echo "trying again..."
+# wait for a deployment
+until [ -f "/tmp/deployment.log" ]; do
+    echo "Use the av-cli to float to $(hostname)"
+    sleep 10
 done
 
-touch /tmp/got-pi-hostname
-printf "\nrecieved env. variables\n"
+printf "\nYay! I'm floating!\n"
 
-# salt setup
-until $(curl https://raw.githubusercontent.com/byuoitav/flight-deck/master/salt-setup.sh > /tmp/salt-setup.sh); do
-	echo "Trying again."
-done
-chmod +x /tmp/salt-setup.sh
-
-until [ -f "/etc/salt/setup" ]; do
-	/tmp/salt-setup.sh
-	wait
+# download generic salt-minion config file
+until $(curl https://raw.githubusercontent.com/byuoitav/flight-deck/master/files/minion > /etc/salt/minion); do
+    echo "Unable to download salt minion file - Trying again in 5 seconds"
+    sleep 5
 done
 
-#make sure the docker-service is enabled
-sudo systemctl enable docker
+# replace host/finger, setup minion id
+sed -i 's/\$SALT_MASTER_HOST/'$SALT_MASTER_HOST'/' /etc/salt/minion
+sed -i 's/\$SALT_MASTER_FINGER/'$SALT_MASTER_FINGER'/' /etc/salt/minion
+echo $SYSTEM_ID > /etc/salt/minion_id
+
+sudo setfacl -m u:pi:rwx /etc/salt/pki/minion/
+sudo setfacl -m u:pi:rwx /etc/salt/pki/minion/*
+
+# make changes take effect
+sudo systemctl restart salt-minion
 
 # docker
 until [ $(docker ps -q | wc -l) -gt 0 ]; do
@@ -32,3 +34,5 @@ until [ $(docker ps -q | wc -l) -gt 0 ]; do
 done
 
 sleep 30
+
+systemctl disable pi-setup.service
