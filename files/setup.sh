@@ -2,7 +2,7 @@
 
 printf "\n\nHi From Danny\n\n"
 
-if [ ! -f "/byu/setup-started" ]; then
+if [ ! -f "/byu/.first-boot-done" ]; then
 	echo "First boot."
 
 	until $(curl https://raw.githubusercontent.com/byuoitav/flight-deck/master/files/first-boot.sh > /tmp/first-boot.sh); do

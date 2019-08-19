@@ -74,4 +74,5 @@ apt -y upgrade
 apt -y autoremove
 apt - y autoclean
 
+touch /byu/.first-boot-done
 reboot
