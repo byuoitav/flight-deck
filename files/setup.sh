@@ -1,9 +1,8 @@
 #!/bin/bash
 
 printf "\n\nHi From Danny\n\n"
-first="/byu/firstboot"
 
-if [ -f "$first" ]; then
+if [ ! -f "/byu/setup-started" ]; then
 	echo "First boot."
 
 	until $(curl https://raw.githubusercontent.com/byuoitav/flight-deck/master/files/first-boot.sh > /tmp/first-boot.sh); do

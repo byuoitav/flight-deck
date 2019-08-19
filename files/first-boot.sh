@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 # This script is used to install and set up dependencies on a newly wiped/installed Raspberry Pi
-bootfile="/byu/firstboot"
 started="/byu/setup-started"
 
 # check if script has already been started
@@ -75,5 +74,4 @@ apt -y upgrade
 apt -y autoremove
 apt - y autoclean
 
-rm $bootfile
 reboot
