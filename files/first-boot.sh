@@ -15,9 +15,6 @@ if [ -f "$started" ]; then
 	exit
 fi
 
-# start
-touch $started
-
 # Update the time (from google, to ensure https works)
 date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 
@@ -50,6 +47,9 @@ while true; do
         continue
     fi
 done
+
+# start
+touch $started
 
 # copy original dhcp file
 cp /etc/dhcpcd.conf /etc/dhcpcd.conf.other
