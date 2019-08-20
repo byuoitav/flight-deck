@@ -3,6 +3,10 @@
 # This script is used to install and set up dependencies on a newly wiped/installed Raspberry Pi
 started="/byu/setup-started"
 
+# print out current IP address
+ip=`ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1  -d'/'`
+echo "\n\nmy ip address: $ip\n\n"
+
 # check if script has already been started
 if [ -f "$started" ]; then
 	echo "setup has been started remotely"
@@ -13,10 +17,6 @@ fi
 
 # start
 touch $started
-
-# print out current IP address
-ip=`ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1  -d'/'`
-echo "\n\nmy ip address: $ip\n\n"
 
 # Update the time (from google, to ensure https works)
 date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
