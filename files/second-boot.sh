@@ -32,11 +32,7 @@ until [ -f "/home/pi/.ssh/authorized_keys" ]; do
 done
 
 # docker
-until [ $(docker ps -q | wc -l) -gt 0 ]; do
-	echo "Waiting for docker containers to download"
-	sleep 10
-done
-
-sleep 30
+echo "Waiting for deployment to finish (~3 minutes)"
+sleep 180
 
 systemctl disable pi-setup.service
