@@ -1,6 +1,6 @@
 #!/bin/bash
 
-sleep 20
+sleep 5
 chvt 2
 
 # try to download the setup script
