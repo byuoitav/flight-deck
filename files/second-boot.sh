@@ -33,3 +33,16 @@ echo "Waiting for deployment to finish (~3 minutes)"
 sleep 180
 
 systemctl disable pi-setup.service
+rm /byu/.first-boot-done
+rm /byu/setup-started
+
+clear
+echo "Setup complete! I'll never see you again."
+echo "I'll reboot in 10 seconds."
+sleep 8
+
+echo ""
+echo "bye lol"
+sleep 2
+
+reboot

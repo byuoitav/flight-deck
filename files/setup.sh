@@ -1,6 +1,8 @@
 #!/bin/bash
 
-printf "\n\nHi From Danny\n\n"
+echo ""
+echo "Hi From Danny"
+echo ""
 
 if [ ! -f "/byu/.first-boot-done" ]; then
 	echo "First boot."
@@ -23,11 +25,3 @@ else
 
 	/tmp/second-boot.sh
 fi
-
-clear
-printf "\n\n\n\n\n\n"
-printf "Setup complete! I'll never see you again."
-printf "\n\tPlease wait for me to reboot.\n"
-sleep 10
-printf "\n\nBye lol"
-sleep 3
