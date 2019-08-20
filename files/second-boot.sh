@@ -25,11 +25,8 @@ setfacl -m u:pi:rwx /etc/salt/pki/minion/*
 # make changes take effect
 systemctl restart salt-minion
 
+echo "Starting salt highstate; This should take ~5 minutes"
 salt-call state.highstate
-until [ -f "/home/pi/.ssh/authorized_keys" ]; do
-    echo "Waiting for salt high state to complete (no ..ssh/authorized_keys file found yet)"
-    sleep 10
-done
 
 # docker
 echo "Waiting for deployment to finish (~3 minutes)"
