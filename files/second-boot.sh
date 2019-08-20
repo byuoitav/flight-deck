@@ -10,22 +10,26 @@ done
 
 printf "\nYay! I'm floating!\n"
 
-# download generic salt-minion config file
-until $(curl https://raw.githubusercontent.com/byuoitav/flight-deck/master/files/minion > /etc/salt/minion); do
-    echo "Unable to download salt minion file - Trying again in 5 seconds"
-    sleep 5
-done
+source /etc/environment
 
-# replace host/finger, setup minion id
-sed -i 's/\$SALT_MASTER_HOST/'$SALT_MASTER_HOST'/' /etc/salt/minion
-sed -i 's/\$SALT_MASTER_FINGER/'$SALT_MASTER_FINGER'/' /etc/salt/minion
+echo "master: $SALT_MASTER_HOST" > /etc/salt/minion
+echo "master_finger: $SALT_MASTER_FINGER" >> /etc/salt/minion
+echo "startup_states: 'highstate'" >> /etc/salt/minion
+
+# setup minion id
 echo $SYSTEM_ID > /etc/salt/minion_id
 
-sudo setfacl -m u:pi:rwx /etc/salt/pki/minion/
-sudo setfacl -m u:pi:rwx /etc/salt/pki/minion/*
+setfacl -m u:pi:rwx /etc/salt/pki/minion/
+setfacl -m u:pi:rwx /etc/salt/pki/minion/*
 
 # make changes take effect
-sudo systemctl restart salt-minion
+systemctl restart salt-minion
+
+salt-call state.highstate
+until [ -f "/home/pi/.ssh/authorized_keys" ]; do
+    echo "Waiting for salt high state to complete (no ..ssh/authorized_keys file found yet)"
+    sleep 10
+done
 
 # docker
 until [ $(docker ps -q | wc -l) -gt 0 ]; do
