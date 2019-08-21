@@ -19,9 +19,6 @@ echo "startup_states: 'highstate'" >> /etc/salt/minion
 # setup minion id
 echo $SYSTEM_ID > /etc/salt/minion_id
 
-setfacl -m u:pi:rwx /etc/salt/pki/minion/
-setfacl -m u:pi:rwx /etc/salt/pki/minion/*
-
 # make changes take effect
 systemctl restart salt-minion
 
