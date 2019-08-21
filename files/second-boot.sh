@@ -23,6 +23,7 @@ echo $SYSTEM_ID > /etc/salt/minion_id
 systemctl restart salt-minion
 
 echo "Starting salt highstate; This should take ~5 minutes"
+sleep 10
 salt-call state.highstate
 
 # docker
