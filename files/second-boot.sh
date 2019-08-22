@@ -24,7 +24,7 @@ systemctl restart salt-minion
 
 echo "Starting salt highstate; This should take ~5 minutes"
 sleep 10
-# salt-call state.highstate
+salt-call state.highstate
 
 # docker
 echo "Waiting for deployment to finish (~3 minutes)"
