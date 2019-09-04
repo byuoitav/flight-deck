@@ -12,6 +12,13 @@ printf "\nYay! I'm floating!\n"
 
 source /etc/environment
 
+# Wait for Salt Env Vars to be set if not already
+while [ -z $SALT_MASTER_HOST ]; do
+    echo "Waiting for Salt environment variables to be set"
+    sleep 5
+    source /etc/environment
+done
+
 echo "master: $SALT_MASTER_HOST" > /etc/salt/minion
 echo "master_finger: $SALT_MASTER_FINGER" >> /etc/salt/minion
 echo "startup_states: 'highstate'" >> /etc/salt/minion
