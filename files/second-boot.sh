@@ -27,11 +27,9 @@ echo "startup_states: 'highstate'" >> /etc/salt/minion
 echo $SYSTEM_ID > /etc/salt/minion_id
 
 # make changes take effect
+echo "Starting salt highstate; This should take ~1 minutes"
 systemctl restart salt-minion
-
-echo "Starting salt highstate; This should take ~5 minutes"
-sleep 10
-salt-call state.highstate
+sleep 60
 
 # docker
 echo "Waiting for deployment to finish (~3 minutes)"
