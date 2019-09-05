@@ -154,6 +154,8 @@ func DeployToDevice(device structs.Device, designation string) (DeployReport, *n
 		return report, nerr.Translate(err).Addf("unable to get deployment info for %s", device.Type.ID)
 	}
 
+	//TODO add check to see if deviceInfo has designations or not
+
 	config, ok := deviceInfo.Designations[designation]
 	if !ok {
 		return report, nerr.Createf("error", "designation '%s' is not configured for %s", designation, device.Type.ID)
