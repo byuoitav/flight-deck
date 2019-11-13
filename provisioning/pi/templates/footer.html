@@ -2,7 +2,14 @@
         <span>
             IP Address: {{.IPAddress}}  
         </span>
-        <button class="btn btn-outline-danger" type="button">Restart</button>
+        <button 
+            class="btn btn-outline-danger" 
+            type="button"
+            onClick="(function(){
+                alert('Hey i am calling');
+                return false;
+            })();"
+        >Restart</button>
     </nav>
 </body>
 </html>
