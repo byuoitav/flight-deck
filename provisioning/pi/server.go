@@ -105,13 +105,13 @@ func openURL(url string) error {
 	return nil
 }
 
-func getIPs() (map[string]net.IP, error) {
+func getIPs() (map[string]*net.IPNet, error) {
 	ifaces, err := net.Interfaces()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get interface list: %s", err)
 	}
 
-	ips := make(map[string]net.IP)
+	ips := make(map[string]*net.IPNet)
 
 	for _, iface := range ifaces {
 		// skip the docker interface
@@ -128,7 +128,7 @@ func getIPs() (map[string]net.IP, error) {
 			switch v := addr.(type) {
 			case *net.IPNet:
 				if v.IP.To4() != nil && !v.IP.IsLoopback() {
-					ips[iface.Name] = v.IP
+					ips[iface.Name] = v
 				}
 			}
 		}
@@ -149,41 +149,23 @@ func setHostname(hn string) error {
 	}
 
 	// find the best IP to use
-	var ip net.IP
+	var ip net.IPNet
 
 	for _, addr := range addrs {
 		i := net.ParseIP(addr)
 		if i != nil && !i.IsLoopback() && i.To4() != nil {
-			ip = i
+			ip.IP = i
 			break
 		}
 	}
 
-	if ip == nil {
+	if ip.IP == nil {
 		// TODO some page for this case?
 		return errors.New("no suitable ip address found")
 	}
 
-	// check that the ip i found works for one of the subnets i'm on
-	ips, err := getIPs()
-	if err != nil {
-		return fmt.Errorf("unable to get ips: %s", err)
-	}
-
-	var valid bool
-	for _, i := range ips {
-		if i.Mask(i.DefaultMask()).Equal(ip.Mask(i.DefaultMask())) {
-			valid = true
-			break
-		}
-	}
-
-	if !valid {
-		return ErrInvalidSubnet
-	}
-
 	// try pinging that IP
-	pinger, err := ping.NewPinger(ip.String())
+	pinger, err := ping.NewPinger(ip.IP.String())
 	if err != nil {
 		return fmt.Errorf("unable to build pinger: %s", err)
 	}
@@ -195,6 +177,23 @@ func setHostname(hn string) error {
 	stats := pinger.Statistics()
 	if stats.PacketsRecv > 0 {
 		return ErrHostnameExists
+	}
+
+	// check that the ip i found works for one of the subnets i'm on
+	ips, err := getIPs()
+	if err != nil {
+		return fmt.Errorf("unable to get ips: %s", err)
+	}
+
+	for _, i := range ips {
+		if i.IP.Mask(i.Mask).Equal(ip.IP.Mask(i.Mask)) {
+			ip.Mask = i.Mask
+			break
+		}
+	}
+
+	if len(ip.Mask) == 0 {
+		return ErrInvalidSubnet
 	}
 
 	return nil
