@@ -1,0 +1,33 @@
+<html>
+    <head>
+        <title>Pi Setup</title>
+        <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="css/test.css">
+        <script src="js/jquery-3.3.1.slim.min.js"></script>
+        <script src="js/jquery-3.4.1.min.js"></script>
+        <script src="js/popper.min.js"></script>
+        <script src="js/bootstrap.min.js"></script>
+        <script type='text/javascript'>
+            $(document).ready(function(){
+                $.ajax({
+                    url : "",
+                    type : 'GET',
+                    
+                    success: function(data) {
+                    }
+                });
+            });
+        </script>
+    </head>
+
+    <body>
+        <div class="container text-center">                
+            <div id="hostname-form" style="margin-top: 20%">
+                <h1>A Static IP Address was not found for this host name.</h1>
+                
+                <h2>Would you like to continue using a DHCP address?</h2>
+                <button class="btn btn-primary btn-lg" id="continueButton">Yes</button> 
+                <button class="btn btn-danger btn-lg" id="restartButton">No</button> 
+            </div> 
+        </div>
+        {{ template "footer.html" . }}

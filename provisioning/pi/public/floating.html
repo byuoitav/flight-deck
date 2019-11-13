@@ -1,0 +1,36 @@
+<html>
+    <head>
+        <title>Pi Setup</title>
+        <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="css/test.css">
+        <script src="js/jquery-3.3.1.slim.min.js"></script>
+        <script src="js/jquery-3.4.1.min.js"></script>
+        <script src="js/popper.min.js"></script>
+        <script src="js/bootstrap.min.js"></script>
+        <script type='text/javascript'>
+            $(document).ready(function(){
+                $("#btnFetch").click(function() {
+                    $(this).prop("disabled", true);
+                    $(this).html(
+                        `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>Loadingg...`
+                    );
+                });
+            });
+        </script>
+    </head>
+
+    <body>
+            <div class="text-center">
+                <br>
+                <br>
+                <br>
+                <br>
+                <h1>Success!</h1>
+                <h3>Please wait while the device is being floated to</h3>
+                <br>
+                <div class="spinner-border" role="status" style="width: 10rem; height: 10rem;">
+                    <span class="sr-only">Loading...</span>
+                </div>
+            </div>
+    </body>
+</html>

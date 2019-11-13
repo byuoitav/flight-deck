@@ -1,0 +1,40 @@
+<html>
+    <head>
+        <title>Pi Setup</title>
+        <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="css/test.css">
+        <script src="js/jquery-3.3.1.slim.min.js"></script>
+        <script src="js/jquery-3.4.1.min.js"></script>
+        <script src="js/popper.min.js"></script>
+        <script src="js/bootstrap.min.js"></script>
+        <script type='text/javascript'>
+            $(document).ready(function(){
+                $.ajax({
+                    url : "",
+                    type : 'GET',
+                    
+                    success: function(data) {
+                    }
+                });
+            });
+        </script>
+    </head>
+
+    <body>
+        <div class="container">                
+            <div id="hostname-form" style="margin-top: 20%">
+                <h1>The IP Address of the Pi does is not valid for the port it is connected to</h1>
+                <h2>The Pi may not work as expected.</h2>
+                <ul>
+                    <li>The switch may not be configured properly</li>
+                    <li>The pi may be connected to the wrong port</li>
+                    <li>If you are are setting up a pi in a different room then click continue</li>
+                </ul>
+                <div class="text-center">
+                    <button class="btn btn-primary btn-lg" id="continueButton">Continue Anyways</button> 
+                    <button class="btn btn-danger btn-lg" id="restartButton">Restart</button> 
+                </div>
+                
+            </div> 
+        </div>
+        {{ template "footer.html" . }}
