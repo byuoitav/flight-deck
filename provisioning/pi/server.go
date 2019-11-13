@@ -21,6 +21,11 @@ type RouteData struct {
 	Hostname string
 }
 
+type IPInfo struct {
+	Interface net.Interface
+	IP        net.IP
+}
+
 type Template struct {
 	templates *template.Template
 }
@@ -28,6 +33,7 @@ type Template struct {
 var (
 	ErrNotInDNS       = errors.New("hostname not found in DNS (qip)")
 	ErrHostnameExists = errors.New("hostname is already on the network")
+	ErrInvalidSubnet  = errors.New("given ip doesn't match current subnet")
 )
 
 func main() {
@@ -39,37 +45,11 @@ func main() {
 
 	// load templates
 	t := &Template{
-		templates: template.Must(template.ParseGlob("./templates/*.html")),
+		// templates: template.Must(template.ParseGlob("./templates/*.html")),
 	}
 
 	e := echo.New()
 	e.Renderer = t
-
-	/*
-		e.GET("/ips", func(c echo.Context) error {
-			ips, err := getIPs()
-			if err != nil {
-				return c.String(http.StatusInternalServerError, err.Error())
-			}
-
-			return c.JSON(http.StatusOK, ips)
-		})
-
-		e.GET("/hostname", func(c echo.Context) error {
-			hn, err := os.Hostname()
-			if err != nil {
-				return c.String(http.StatusInternalServerError, err.Error())
-			}
-
-			ret := struct {
-				Hostname string `json:"hostname"`
-			}{
-				Hostname: hn,
-			}
-
-			return c.JSON(http.StatusOK, ret)
-		})
-	*/
 
 	e.PUT("/hostname/:hostname", func(c echo.Context) error {
 		hn := c.Param("hostname")
@@ -82,9 +62,9 @@ func main() {
 		case errors.Is(err, ErrNotInDNS):
 			// redirect to please put in qip
 		case err != nil:
-		default:
-			return c.String(http.StatusOK, "success!")
+			return c.String(http.StatusInternalServerError, err.Error())
 		}
+		return c.String(http.StatusOK, "success!")
 	})
 
 	// launch chomium
@@ -125,13 +105,13 @@ func openURL(url string) error {
 	return nil
 }
 
-func getIPs() ([]string, error) {
-	var ips []string
-
+func getIPs() (map[string]net.IP, error) {
 	ifaces, err := net.Interfaces()
 	if err != nil {
-		return ips, fmt.Errorf("failed to get interface list: %s", err)
+		return nil, fmt.Errorf("failed to get interface list: %s", err)
 	}
+
+	ips := make(map[string]net.IP)
 
 	for _, iface := range ifaces {
 		// skip the docker interface
@@ -147,10 +127,8 @@ func getIPs() ([]string, error) {
 		for _, addr := range addrs {
 			switch v := addr.(type) {
 			case *net.IPNet:
-				ipv4 := v.IP.To4()
-
-				if ipv4 != nil && !v.IP.IsLoopback() {
-					ips = append(ips, ipv4.String())
+				if v.IP.To4() != nil && !v.IP.IsLoopback() {
+					ips[iface.Name] = v.IP
 				}
 			}
 		}
@@ -182,7 +160,26 @@ func setHostname(hn string) error {
 	}
 
 	if ip == nil {
+		// TODO some page for this case?
 		return errors.New("no suitable ip address found")
+	}
+
+	// check that the ip i found works for one of the subnets i'm on
+	ips, err := getIPs()
+	if err != nil {
+		return fmt.Errorf("unable to get ips: %s", err)
+	}
+
+	var valid bool
+	for _, i := range ips {
+		if i.Mask(i.DefaultMask()).Equal(ip.Mask(i.DefaultMask())) {
+			valid = true
+			break
+		}
+	}
+
+	if !valid {
+		return ErrInvalidSubnet
 	}
 
 	// try pinging that IP
@@ -191,7 +188,8 @@ func setHostname(hn string) error {
 		return fmt.Errorf("unable to build pinger: %s", err)
 	}
 
-	pinger.Count = 5
+	pinger.Timeout = 5 * time.Second
+	pinger.Count = 3
 	pinger.Run()
 
 	stats := pinger.Statistics()
