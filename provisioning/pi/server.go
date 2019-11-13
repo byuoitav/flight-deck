@@ -11,6 +11,7 @@ import (
 	"os/exec"
 	"strings"
 	"time"
+	"path"
 
 	"github.com/labstack/echo"
 	"github.com/sparrc/go-ping"
@@ -38,18 +39,31 @@ var (
 
 func main() {
 	// check that we are root
-	if os.Getuid() != 0 {
-		fmt.Printf("must be run as root\n")
-		os.Exit(1)
-	}
+	// if os.Getuid() != 0 {
+	// 	fmt.Printf("must be run as root\n")
+	// 	os.Exit(1)
+	// }
 
 	// load templates
 	t := &Template{
-		// templates: template.Must(template.ParseGlob("./templates/*.html")),
+		templates: template.Must(template.ParseGlob("./templates/*.html")),
 	}
 
 	e := echo.New()
 	e.Renderer = t
+
+	e.Static("/static", "public")
+
+	e.GET("/pages/*", func(c echo.Context) error {		
+		pageName := path.Base(c.Request().URL.Path)	
+
+		err := c.Render(http.StatusOK, pageName + ".html", map[string]string{ "Name": "Matthew Smith"})
+		if err != nil {
+			fmt.Printf("error rendering template %s: %v", pageName, err)
+		}
+
+		return err
+	})
 
 	e.PUT("/hostname/:hostname", func(c echo.Context) error {
 		hn := c.Param("hostname")
@@ -86,6 +100,7 @@ func main() {
 	}
 }
 
+//Render Meet the echo templating requirement
 func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
 	return t.templates.ExecuteTemplate(w, name, data)
 }

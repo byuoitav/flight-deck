@@ -1,0 +1,40 @@
+<html>
+    <head>
+        <title>Pi Setup</title>
+        <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="/static/css/test.css">
+        <script src="/static/js/jquery-3.3.1.slim.min.js"></script>
+        <script src="/static/js/jquery-3.4.1.min.js"></script>
+        <script src="/static/js/popper.min.js"></script>
+        <script src="/static/js/bootstrap.min.js"></script>
+        <script type='text/javascript'>
+            $(document).ready(function(){
+                $("#hostnameButton").click(function(){
+                    var hostname = $('#hostname').val();
+                    $.ajax({
+                        url : "/hostname/"+hostname,
+                        type : 'PUT',
+                        success: function(data) {
+                            console.log("SUCCESS, Danny is going to show you the world.")
+                        },
+                        error: function() {
+                            console.log("FAILED")
+                        }
+                    });
+                });
+            });
+        </script>
+    </head>
+
+    <body>
+        <div class="container text-center">                
+            <div id="hostname-form" style="margin-top: 20%">
+                <h1>Please Enter The Host Name Below:</h1>
+                
+                <label>Host Name:</label><br />
+                <input type="text" id="hostname" name="hostname"><br />
+                </br>
+                <button class="btn btn-lg btn-primary" id="hostnameButton">Save</button> 
+            </div> 
+        </div>
+        {{ template "footer.html" . }}
