@@ -8,7 +8,6 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"os/exec"
 	"path"
 	"strings"
 	"sync"
@@ -22,6 +21,8 @@ const (
 	HostnameFile = "/etc/hostname"
 	DHCPFile     = "/etc/dhcpcd.conf"
 	ResolveFile  = "/etc/resolv.conf"
+
+	Domain = ".byu.edu"
 )
 
 type RouteData struct {
@@ -170,19 +171,6 @@ func main() {
 		return setHostnameHandler(c)
 	})
 
-	// launch chomium
-	/*
-		go func() {
-			// wait for the server to start
-			time.Sleep(10 * time.Second)
-
-			if err := openURL(StartURL); err != nil {
-				fmt.Printf("failed to open browser: %s\n", err)
-				os.Exit(1)
-			}
-		}()
-	*/
-
 	// update current data every 10 seconds
 	go func() {
 		updateIPs := func() {
@@ -238,21 +226,6 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 	return t.templates.ExecuteTemplate(w, name, data)
 }
 
-func openURL(url string) error {
-	// do i need to do chromium specifically
-	cmd := exec.Command("chromium-browser", url)
-
-	if err := cmd.Start(); err != nil {
-		return fmt.Errorf("unable to open browser: %s", err)
-	}
-
-	if err := cmd.Wait(); err != nil {
-		return fmt.Errorf("unable to wait for process: %s", err)
-	}
-
-	return nil
-}
-
 func getIPs() (map[string]*net.IPNet, error) {
 	ifaces, err := net.Interfaces()
 	if err != nil {
@@ -289,7 +262,7 @@ func setHostname(hn string, ignoreSubnet bool, useDHCP bool) error {
 	fmt.Printf("Setting hostname to %s (ignoreSubnet: %v, useDHCP: %v)\n", hn, ignoreSubnet, useDHCP)
 
 	// dns lookup new hostname
-	addrs, err := net.LookupHost(hn)
+	addrs, err := net.LookupHost(hn + Domain)
 	if err != nil {
 		return fmt.Errorf("unable to lookup host: %w", err)
 	}
@@ -315,7 +288,7 @@ func setHostname(hn string, ignoreSubnet bool, useDHCP bool) error {
 	}
 
 	if !useDHCP {
-		fmt.Printf("Address found for %s in DNS: %s\n", hn, ip.IP.String())
+		fmt.Printf("Address found for %s%s in DNS: %s\n", hn, Domain, ip.IP.String())
 	}
 
 	// try pinging that IP
@@ -323,7 +296,7 @@ func setHostname(hn string, ignoreSubnet bool, useDHCP bool) error {
 	if ip.IP != nil {
 		pinger, err = ping.NewPinger(ip.IP.String())
 	} else {
-		pinger, err = ping.NewPinger(hn)
+		pinger, err = ping.NewPinger(hn + Domain)
 	}
 	if err != nil {
 		return fmt.Errorf("unable to build pinger: %s", err)
