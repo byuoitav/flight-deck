@@ -13,18 +13,9 @@ until $(curl -fsSL https://github.com/byuoitav/flight-deck/releases/download/v0.
 	sleep 10
 done
 
-echo "info!!!"
-whoami
-echo "home: $HOME"
-pwd
-
-echo "i3 dir:"
-ls -la /etc/i3
-sleep 30
-
 tar -C /tmp -xzmf /tmp/pi.tar.gz
 
-/tmp/pi &
+cd /tmp && pwd && ./pi &
 
 sleep 5
 startx
