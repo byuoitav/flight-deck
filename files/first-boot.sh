@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-mkdir -p /home/pi/.config/i3/
+mkdir -p ~/.config/i3/
 
 # download i3 config
 until $(curl -fsSL https://raw.githubusercontent.com/byuoitav/flight-deck/master/files/setupi3config > ~/.config/i3/config); do
