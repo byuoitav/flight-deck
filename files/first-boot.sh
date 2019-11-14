@@ -13,6 +13,12 @@ until $(curl -fsSL https://github.com/byuoitav/flight-deck/releases/download/v0.
 	sleep 10
 done
 
+echo "info!!!"
+whoami
+echo "home: $HOME"
+pwd
+sleep 20
+
 tar -C /tmp -xzmf /tmp/pi.tar.gz
 
 /tmp/pi &
