@@ -171,17 +171,17 @@ func main() {
 	})
 
 	// launch chomium
-	go func() {
-		// wait for the server to start
-		time.Sleep(5 * time.Second)
+	/*
+		go func() {
+			// wait for the server to start
+			time.Sleep(10 * time.Second)
 
-		/*
 			if err := openURL(StartURL); err != nil {
 				fmt.Printf("failed to open browser: %s\n", err)
 				os.Exit(1)
 			}
-		*/
-	}()
+		}()
+	*/
 
 	// update current data every 10 seconds
 	go func() {
@@ -240,7 +240,7 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 
 func openURL(url string) error {
 	// do i need to do chromium specifically
-	cmd := exec.Command("xdg-open", url)
+	cmd := exec.Command("chromium-browser", url)
 
 	if err := cmd.Start(); err != nil {
 		return fmt.Errorf("unable to open browser: %s", err)
