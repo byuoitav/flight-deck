@@ -19,26 +19,25 @@ import (
 )
 
 const (
-	// HostnameFile = "/etc/hostname"
-	// DHCPFile     = "/etc/dhcpcd.conf"
-	// ResolveFile  = "/etc/resolv.conf"
-
-	HostnameFile = "./hostname"
-	DHCPFile     = "./dhcpcd.conf"
-	ResolveFile  = "./resolv.conf"
+	HostnameFile = "/etc/hostname"
+	DHCPFile     = "/etc/dhcpcd.conf"
+	ResolveFile  = "/etc/resolv.conf"
 )
 
 type RouteData struct {
+	// auto updating
 	IPs            map[string]string
 	ActualHostname string
-	Error          error
+
+	// set by user
+	DesiredHostname string
+	AssignedIP      string
 
 	// flags
 	IgnoreSubnet bool
 	UseDHCP      bool
 
-	DesiredHostname string
-	AssignedIP      string
+	Error error
 
 	sync.Mutex
 }
@@ -78,6 +77,15 @@ func main() {
 		data.Lock()
 		defer data.Unlock()
 
+		// reset data on start page
+		if pageName == "start" {
+			data.DesiredHostname = ""
+			data.AssignedIP = ""
+			data.Error = nil
+			data.UseDHCP = false
+			data.IgnoreSubnet = false
+		}
+
 		err := c.Render(http.StatusOK, pageName+".html", data)
 		if err != nil {
 			fmt.Printf("error rendering template %s: %v", pageName, err)
@@ -94,7 +102,7 @@ func main() {
 		switch {
 		case errors.Is(err, ErrNotInDNS):
 			fmt.Printf("redirecting to 'not in dns' page\n\n")
-			return c.Redirect(http.StatusTemporaryRedirect, "/pages/updateQIP")
+			return c.Redirect(http.StatusTemporaryRedirect, "/pages/useDHCP")
 		case errors.Is(err, ErrHostnameExists):
 			fmt.Printf("redirecting to 'hostname already exists' page\n\n")
 			return c.Redirect(http.StatusTemporaryRedirect, "/pages/hostnameTaken")
@@ -136,10 +144,23 @@ func main() {
 		return c.Redirect(http.StatusTemporaryRedirect, "/pages/start")
 	})
 
+	// catch empty hostname
+	e.GET("/hostname/", func(c echo.Context) error {
+		data.Lock()
+		data.Error = errors.New("Invalid hostname. Must be in the format ITB-1101-CP1")
+		data.Unlock()
+
+		return c.Redirect(http.StatusTemporaryRedirect, "/pages/error")
+	})
+
 	e.GET("/hostname/:hostname", func(c echo.Context) error {
 		hn := c.Param("hostname")
 		if len(hn) == 0 {
-			return c.String(http.StatusBadRequest, "must include a valid hostname")
+			data.Lock()
+			data.Error = errors.New("Invalid hostname. Must be in the format ITB-1101-CP1")
+			data.Unlock()
+
+			return c.Redirect(http.StatusTemporaryRedirect, "/pages/error")
 		}
 
 		data.Lock()
@@ -155,7 +176,7 @@ func main() {
 		time.Sleep(5 * time.Second)
 
 		/*
-			if err := openURL("http://localhost/"); err != nil {
+			if err := openURL(StartURL); err != nil {
 				fmt.Printf("failed to open browser: %s\n", err)
 				os.Exit(1)
 			}
@@ -298,24 +319,27 @@ func setHostname(hn string, ignoreSubnet bool, useDHCP bool) error {
 	}
 
 	// try pinging that IP
+	var pinger *ping.Pinger
 	if ip.IP != nil {
-		pinger, err := ping.NewPinger(ip.IP.String())
-		if err != nil {
-			return fmt.Errorf("unable to build pinger: %s", err)
-		}
+		pinger, err = ping.NewPinger(ip.IP.String())
+	} else {
+		pinger, err = ping.NewPinger(hn)
+	}
+	if err != nil {
+		return fmt.Errorf("unable to build pinger: %s", err)
+	}
 
-		fmt.Printf("Pinging %s...\n", ip.IP.String())
+	fmt.Printf("Pinging %s...\n", pinger.Addr())
 
-		pinger.Timeout = 5 * time.Second
-		pinger.Count = 3
-		pinger.Run()
+	pinger.Timeout = 5 * time.Second
+	pinger.Count = 3
+	pinger.Run()
 
-		stats := pinger.Statistics()
-		fmt.Printf("Received %v ping responses from %s (total loss: %v%%)\n", stats.PacketsRecv, ip.IP.String(), stats.PacketLoss)
+	stats := pinger.Statistics()
+	fmt.Printf("Received %v ping responses from %s (total loss: %v%%)\n", stats.PacketsRecv, pinger.Addr(), stats.PacketLoss)
 
-		if stats.PacketsRecv > 0 {
-			return ErrHostnameExists
-		}
+	if stats.PacketsRecv > 0 {
+		return ErrHostnameExists
 	}
 
 	// check that the ip i found works for one of the subnets i'm on

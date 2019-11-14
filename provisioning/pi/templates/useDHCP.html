@@ -36,7 +36,13 @@
         >
           Yes
         </button>
-        <button class="btn btn-danger btn-lg" id="restartButton">No</button>
+        <button
+          class="btn btn-danger btn-lg"
+          id="restartButton"
+          onclick="window.location.pathname = '/pages/updateQIP'"
+        >
+          No
+        </button>
       </div>
     </div>
     {{ template "footer.html" . }}
