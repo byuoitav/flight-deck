@@ -3,12 +3,12 @@
 mkdir -p /home/pi/.config/i3/
 
 # download i3 config
-until $(curl https://raw.githubusercontent.com/byuoitav/flight-deck/master/files/setupi3config > /home/pi/.config/i3/config); do
+until $(curl -fsSL https://raw.githubusercontent.com/byuoitav/flight-deck/master/files/setupi3config > /home/pi/.config/i3/config); do
 	echo "Unable to download pi setup server"
 	sleep 10
 done
 
-until $(curl https://github.com/byuoitav/flight-deck/releases/download/v0.1.1/pi.tar.gz > /tmp/pi.tar.gz); do
+until $(curl -fsSL https://github.com/byuoitav/flight-deck/releases/download/v0.1.1/pi.tar.gz > /tmp/pi.tar.gz); do
 	echo "Unable to download pi setup server"
 	sleep 10
 done
