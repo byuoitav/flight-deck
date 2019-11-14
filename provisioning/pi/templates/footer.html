@@ -1,0 +1,19 @@
+<nav class="navbar fixed-bottom bg-light">
+        <span>
+			Current Hostname: {{ .ActualHostname }}
+        </span>
+
+        <span>
+			IP Address(s): 
+			{{ range $key, $value := .IPs }}
+			{{ $key }}: {{ $value }}
+			{{ end }}
+        </span>
+        <button 
+            class="btn btn-outline-danger" 
+            type="button"
+            onClick="window.location.pathname = '/pages/start'"
+        >Restart</button>
+    </nav>
+</body>
+</html>
