@@ -16,3 +16,7 @@
     height: 1rem;
     border-width: .2em;
 }
+
+#hostname {
+    margin-right: 20px;
+}
