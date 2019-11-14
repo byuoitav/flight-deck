@@ -13,7 +13,7 @@ until $(curl -fsSL https://github.com/byuoitav/flight-deck/releases/download/v0.
 	sleep 10
 done
 
-tar -xzmf /tmp/pi.tar.gz
+tar -xzmf /tmp/pi.tar.gz /tmp
 
 /tmp/pi &
 
