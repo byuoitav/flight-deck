@@ -1,14 +1,18 @@
 <nav class="navbar fixed-bottom bg-light">
         <span>
-            IP Address: {{.IPAddress}}  
+			Current Hostname: {{ .ActualHostname }}
+        </span>
+
+        <span>
+			IP Address(s): 
+			{{ range $key, $value := .IPs }}
+			{{ $key }}: {{ $value }}
+			{{ end }}
         </span>
         <button 
             class="btn btn-outline-danger" 
             type="button"
-            onClick="(function(){
-                alert('Hey i am calling');
-                return false;
-            })();"
+            onClick="window.location.pathname = '/pages/start'"
         >Restart</button>
     </nav>
 </body>

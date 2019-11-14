@@ -20,11 +20,15 @@
     <div class="text-center">
       <br />
       <br />
-      <h1>Failed!</h1>
-      <h3>An error occured in the floating process</h3>
+      <h1>Error!</h1>
+      <h3>{{ .Error }}</h3>
       <br />
-      <button class="btn btn-outline-danger btn-lg" type="button">
-        Re-Float
+      <button
+        class="btn btn-outline-danger btn-lg"
+        type="button"
+        onClick="window.location.pathname = '/pages/start'"
+      >
+        Restart
       </button>
     </div>
     {{ template "footer.html" . }}
