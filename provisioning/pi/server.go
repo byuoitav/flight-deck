@@ -117,7 +117,7 @@ func main() {
 		}
 
 		// redirect to success page
-		return c.Redirect(http.StatusTemporaryRedirect, "/pages/hostnameSuccess")
+		return c.Redirect(http.StatusTemporaryRedirect, "/pages/hostnameSetSuccess")
 	}
 
 	e.GET("/ignoreSubnet", func(c echo.Context) error {
