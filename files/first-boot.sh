@@ -15,9 +15,9 @@ done
 
 tar -C /tmp -xzmf /tmp/pi.tar.gz
 
-cd /tmp && pwd && ./pi &
+cd /tmp && ./pi &
 
-sleep 5
+sleep 10
 startx
 
 ############
