@@ -11,14 +11,25 @@
     <script src="/static/js/jquery-3.4.1.min.js"></script>
     <script src="/static/js/popper.min.js"></script>
     <script src="/static/js/bootstrap.min.js"></script>
-    <script type="text/javascript"></script>
+    <script type="text/javascript">
+      $(document).ready(function() {});
+    </script>
   </head>
 
   <body>
-    <div class="container text-center">
-      <div id="hostname-form" style="margin-top: 20%">
-        <h1>Please update QIP and assign the host name a static IP address</h1>
-      </div>
+    <div class="text-center">
+      <br />
+      <br />
+      <h1>Error!</h1>
+      <h3>{{ .Error }}</h3>
+      <br />
+      <button
+        class="btn btn-outline-danger btn-lg"
+        type="button"
+        onClick="window.location.pathname = '/pages/start'"
+      >
+        Restart
+      </button>
     </div>
     {{ template "footer.html" . }}
   </body>
