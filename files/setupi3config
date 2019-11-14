@@ -169,4 +169,4 @@ bar {
         status_command i3status
 }
 
-exec chromium-browser http://localhost/pages/start
+exec chromium-browser --no-sandbox http://localhost/pages/start

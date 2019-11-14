@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-mkdir -p ~/.config/i3/
+mkdir -p /etc/i3
 
 # download i3 config
-until $(curl -fsSL https://raw.githubusercontent.com/byuoitav/flight-deck/master/files/setupi3config > ~/.config/i3/config); do
+until $(curl -fsSL https://raw.githubusercontent.com/byuoitav/flight-deck/master/files/setupi3config > /etc/i3/config); do
 	echo "Unable to download pi setup server"
 	sleep 10
 done
@@ -17,7 +17,10 @@ echo "info!!!"
 whoami
 echo "home: $HOME"
 pwd
-sleep 20
+
+echo "i3 dir:"
+ls -la /etc/i3
+sleep 30
 
 tar -C /tmp -xzmf /tmp/pi.tar.gz
 
