@@ -8,7 +8,7 @@ until $(curl -fsSL https://raw.githubusercontent.com/byuoitav/flight-deck/master
 	sleep 10
 done
 
-until $(curl -fsSL https://github.com/byuoitav/flight-deck/releases/download/v0.1.1/pi.tar.gz > /tmp/pi.tar.gz); do
+until $(curl -fsSL https://github.com/byuoitav/flight-deck/releases/download/v0.1.2/pi.tar.gz > /tmp/pi.tar.gz); do
 	echo "Unable to download pi setup server"
 	sleep 10
 done
