@@ -9,9 +9,9 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path"
 	"strings"
 	"time"
-	"path"
 
 	"github.com/labstack/echo"
 	"github.com/sparrc/go-ping"
@@ -39,10 +39,10 @@ var (
 
 func main() {
 	// check that we are root
-	// if os.Getuid() != 0 {
-	// 	fmt.Printf("must be run as root\n")
-	// 	os.Exit(1)
-	// }
+	if os.Getuid() != 0 {
+		fmt.Printf("must be run as root\n")
+		os.Exit(1)
+	}
 
 	// load templates
 	t := &Template{
@@ -54,10 +54,10 @@ func main() {
 
 	e.Static("/static", "public")
 
-	e.GET("/pages/*", func(c echo.Context) error {		
-		pageName := path.Base(c.Request().URL.Path)	
+	e.GET("/pages/*", func(c echo.Context) error {
+		pageName := path.Base(c.Request().URL.Path)
 
-		err := c.Render(http.StatusOK, pageName + ".html", map[string]string{ "Name": "Matthew Smith"})
+		err := c.Render(http.StatusOK, pageName+".html", map[string]string{"Name": "Matthew Smith"})
 		if err != nil {
 			fmt.Printf("error rendering template %s: %v", pageName, err)
 		}
@@ -71,7 +71,7 @@ func main() {
 			return c.String(http.StatusBadRequest, "must include a valid hostname")
 		}
 
-		err := setHostname(hn)
+		err := setHostname(hn, true)
 		switch {
 		case errors.Is(err, ErrNotInDNS):
 			// redirect to please put in qip
@@ -152,7 +152,7 @@ func getIPs() (map[string]*net.IPNet, error) {
 	return ips, nil
 }
 
-func setHostname(hn string) error {
+func setHostname(hn string, ignoreSubnet bool) error {
 	// dns lookup new hostname
 	addrs, err := net.LookupHost(hn)
 	if err != nil {
@@ -164,7 +164,7 @@ func setHostname(hn string) error {
 	}
 
 	// find the best IP to use
-	var ip net.IPNet
+	ip := &net.IPNet{}
 
 	for _, addr := range addrs {
 		i := net.ParseIP(addr)
@@ -208,8 +208,88 @@ func setHostname(hn string) error {
 	}
 
 	if len(ip.Mask) == 0 {
-		return ErrInvalidSubnet
+		if !ignoreSubnet {
+			return ErrInvalidSubnet
+		}
+
+		// default to a /24
+		ip.Mask = net.IPv4Mask(255, 255, 255, 0)
+	}
+
+	/*
+		// change the hostname
+		if err = changeHostname(hn); err != nil {
+			return fmt.Errorf("failed to change hostname: %w", err)
+		}
+	*/
+
+	// change the ip
+	if err = changeIP(ip); err != nil {
+		return fmt.Errorf("failed to change the ip: %w", err)
 	}
 
 	return nil
+}
+
+func changeHostname(hn string) error {
+	f, err := os.Create("/etc/hostname")
+	if err != nil {
+		return fmt.Errorf("failed to open file %q: %w", "/etc/hostname", err)
+	}
+	defer f.Close()
+
+	n, err := f.WriteString(hn)
+	switch {
+	case err != nil:
+		return fmt.Errorf("failed to write: %w", err)
+	case len(hn) != n:
+		return fmt.Errorf("failed to write: wrote %v/%v bytes", n, len(hn))
+	}
+
+	return nil
+}
+
+func changeIP(ip *net.IPNet) error {
+	// copy to backup
+
+	/*
+		f, err := os.Open("/etc/dhcpcd.conf", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			return fmt.Errorf("failed to open file %q: %w", "/etc/dhcpcd.conf", err)
+		}
+	*/
+
+	// TODO get this from the current subnet, just like the mask?
+	// default router address is .1
+	router := ip.IP.Mask(ip.Mask)
+	router = incrementIP(router)
+
+	// TODO interface
+	var str strings.Builder
+	str.WriteString("interface eth0\n")
+	str.WriteString(fmt.Sprintf("static ip_address=%s\n", ip.String()))
+	str.WriteString(fmt.Sprintf("static routers=%s\n", router.String()))
+	str.WriteString("static domain_name_servers=127.0.0.1 10.8.0.19 10.8.0.26\n")
+	fmt.Printf("str:\n%s\n", str.String())
+
+	// TODO write string to file!
+
+	// resolve.conf
+	return nil
+}
+
+func incrementIP(ip net.IP) net.IP {
+	newIP := make([]byte, len(ip))
+	copy(newIP, ip)
+
+	for i := len(newIP) - 1; i >= 0; i-- {
+		newIP[i]++
+
+		// only add to the next byte if we overflowed
+		if newIP[i] != 0 {
+			break
+		}
+	}
+
+	return newIP
 }
