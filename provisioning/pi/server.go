@@ -19,9 +19,9 @@ import (
 )
 
 const (
-	HostnameFile = "/etc/hostname"
-	DHCPFile     = "/etc/dhcpcd.conf"
-	ResolveFile  = "/etc/resolv.conf"
+	HostnameFile = "./hostname"
+	DHCPFile     = "./dhcpcd.conf"
+	ResolveFile  = "./resolv.conf"
 )
 
 type RouteData struct {
