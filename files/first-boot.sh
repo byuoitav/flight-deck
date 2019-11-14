@@ -13,9 +13,12 @@ until $(curl -fsSL https://github.com/byuoitav/flight-deck/releases/download/v0.
 	sleep 10
 done
 
-tar -xzvf /tmp/pi.tar.gz
+tar -xzmf /tmp/pi.tar.gz
 
-exec /tmp/pi
+/tmp/pi &
+
+sleep 5
+startx
 
 ############
 ## This script is used to install and set up dependencies on a newly wiped/installed Raspberry Pi
