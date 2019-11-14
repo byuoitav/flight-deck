@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+mkdir -p /home/pi/.config/i3/
+
 # download i3 config
 until $(curl https://raw.githubusercontent.com/byuoitav/flight-deck/master/files/setupi3config > /home/pi/.config/i3/config); do
 	echo "Unable to download pi setup server"
