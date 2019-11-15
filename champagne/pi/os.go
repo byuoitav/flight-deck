@@ -12,7 +12,7 @@ import (
 func fixTime() error {
 	fmt.Printf("Fixing time\n")
 
-	cmd := exec.Command("ntpdate", "pool.ntp.org")
+	cmd := exec.Command("ntpdate", "tick.byu.edu")
 	cmd.Stdout = os.Stdout
 	cmd.Stdin = os.Stdin
 	if err := cmd.Run(); err != nil {
