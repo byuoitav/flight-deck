@@ -18,9 +18,9 @@ import (
 )
 
 const (
-	HostnameFile = "./hostname"
-	DHCPFile     = "./dhcpcd.conf"
-	ResolveFile  = "./resolv.conf"
+	HostnameFile = "/etc/hostname"
+	DHCPFile     = "/etc/dhcpcd.conf"
+	ResolveFile  = "/etc/resolv.conf"
 
 	Domain = ".byu.edu"
 )
