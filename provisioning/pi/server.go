@@ -18,9 +18,9 @@ import (
 )
 
 const (
-	HostnameFile = "/etc/hostname"
-	DHCPFile     = "/etc/dhcpcd.conf"
-	ResolveFile  = "/etc/resolv.conf"
+	HostnameFile = "./hostname"
+	DHCPFile     = "./dhcpcd.conf"
+	ResolveFile  = "./resolv.conf"
 
 	Domain = ".byu.edu"
 )
@@ -169,6 +169,20 @@ func main() {
 		data.Unlock()
 
 		return setHostnameHandler(c)
+	})
+
+	e.GET("/redirect", func(c echo.Context) error {
+		hostname, err := os.Hostname()
+		if err != nil {
+			data.Lock()
+			data.Error = err
+			data.Unlock()
+			return c.Redirect(http.StatusTemporaryRedirect, "/pages/error")
+		}
+		if hostname == "raspberrypi" {
+			return c.Redirect(http.StatusTemporaryRedirect, "/pages/start")
+		}
+		return c.Redirect(http.StatusTemporaryRedirect, "/pages/floating")
 	})
 
 	// update current data every 10 seconds

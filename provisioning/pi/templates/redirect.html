@@ -12,7 +12,14 @@
     <script src="/static/js/popper.min.js"></script>
     <script src="/static/js/bootstrap.min.js"></script>
     <script type="text/javascript">
-      $(document).ready(function() {});
+      $(document).ready(function() {
+        $("#btnFetch").click(function() {
+          $(this).prop("disabled", true);
+          $(this).html(
+            `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>Loadingg...`
+          );
+        });
+      });
     </script>
   </head>
 
@@ -20,16 +27,15 @@
     <div class="text-center">
       <br />
       <br />
-      <h1>Error!</h1>
-      <h3>{{ .Error }}</h3>
+      <h1>Redirecting...</h1>
+      <h3>Please wait while you get redirected to a different screen</h3>
       <br />
-      <button
-        class="btn btn-outline-danger btn-lg"
-        type="button"
-        onClick="window.location.pathname = '/pages/redirect'"
+      <div
+        class="spinner-border"
+        role="status"
+        style="width: 10rem; height: 10rem;"
       >
-        Restart
-      </button>
+      </div>
     </div>
     {{ template "footer.html" . }}
   </body>
