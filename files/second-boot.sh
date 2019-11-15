@@ -11,7 +11,7 @@ until $(curl -fsSL https://raw.githubusercontent.com/byuoitav/flight-deck/master
 	sleep 10
 done
 
-until $(curl -fsSL https://github.com/byuoitav/flight-deck/releases/download/v0.1.3/pi.tar.gz > /tmp/pi.tar.gz); do
+until $(curl -fsSL https://github.com/byuoitav/flight-deck/releases/download/v0.1.4/pi.tar.gz > /tmp/pi.tar.gz); do
 	echo "Unable to download pi setup server"
 	sleep 10
 done
@@ -57,7 +57,7 @@ startx
 # echo "Waiting for deployment to finish (~3 minutes)"
 # sleep 180
 
-# shutdown -r 
+# shutdown -r
 
 # systemctl disable pi-setup.service
 # rm -f /byu/.first-boot-done
