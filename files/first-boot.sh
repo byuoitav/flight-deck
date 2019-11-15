@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
 #############################
+script -f /tmp/champagne.log
+
 mkdir -p /etc/i3
 
 # download i3 config
