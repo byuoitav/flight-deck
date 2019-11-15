@@ -19,14 +19,14 @@ import (
 
 var errDeviceNotFound = errors.New("Unable to find specified device in the database")
 
+// Server represents the configuration necessary for the server to run
 type Server struct {
 	wso2Client wso2.Client
 }
 
 func main() {
 
-	log.SetLevel("debug")
-
+	// Setup the configuration flags
 	port := pflag.IntP("port", "p", 8000, "The port that the server should run on")
 	gwURL := pflag.String("gateway-url", "", "The base URL for the API gateway where flight-deck resides")
 	cID := pflag.String("client-id", "", "The Client ID for the server")
@@ -34,6 +34,7 @@ func main() {
 
 	pflag.Parse()
 
+	// Warn if not all the required configuration flags are set
 	if *gwURL == "" || *cID == "" || *cSecret == "" {
 		log.L.Errorf("--gateway-url, --client-id, and --client-secret must all be set")
 		os.Exit(1)
@@ -49,13 +50,14 @@ func main() {
 
 	router := common.NewRouter()
 
-	router.POST("/float", server.float)
+	router.POST("/float", server.handleFloat)
 
 	addr := fmt.Sprintf(":%d", *port)
 	router.Start(addr)
 }
 
-func (s *Server) float(c echo.Context) error {
+// handleFloat handles the incoming request to float a pi
+func (s *Server) handleFloat(c echo.Context) error {
 
 	log.L.Debugf("Starting to attempt float for ip: %s", c.RealIP())
 
@@ -119,6 +121,7 @@ func (s *Server) float(c echo.Context) error {
 		)
 	}
 
+	// Worked successfully, return success
 	res := struct {
 		Message string
 	}{
@@ -130,8 +133,11 @@ func (s *Server) float(c echo.Context) error {
 	return nil
 }
 
+// floatDevice attempts to get flight-deck to float to the given name from the
+// given location
 func (s *Server) floatDevice(name, env string) error {
 
+	// Make the request to flight-deck
 	res, err := s.wso2Client.Get(fmt.Sprintf(
 		"https://api.byu.edu/domains/av/flight-deck/%s/webhook_device/%s",
 		env,
@@ -141,6 +147,7 @@ func (s *Server) floatDevice(name, env string) error {
 		return fmt.Errorf("Error while making request to flight-deck: %w", err)
 	}
 
+	// If we got an error back try to figure out what went wrong
 	defer res.Body.Close()
 	if res.StatusCode != http.StatusOK {
 		body, err := ioutil.ReadAll(res.Body)
@@ -148,6 +155,7 @@ func (s *Server) floatDevice(name, env string) error {
 			return fmt.Errorf("Unable to read error body from flight-deck: %w", err)
 		}
 
+		// If the device isn't in flight-deck's database then return errDeviceNotFound
 		if strings.Contains(string(body), "failed to find device") {
 			return errDeviceNotFound
 		}

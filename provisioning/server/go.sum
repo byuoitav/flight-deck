@@ -1,5 +1,7 @@
 github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
+github.com/byuoitav/auth v0.1.2 h1:zDDhhzR9GCuAn7LHCroBuHqJSHA7oRlecxoml09RZ9Q=
+github.com/byuoitav/auth v0.1.2/go.mod h1:iMyfQSA81axo1sglQus76VrRky0oA+VLXdNtH6fzinQ=
 github.com/byuoitav/common v0.0.0-20191002152922-df81767c74ab/go.mod h1:YTDTFEmez7HU3oyCIWjU3RfQ/P6v24LEzH5YUebph7I=
 github.com/byuoitav/common v0.0.0-20191031153011-56b526594c6b h1:sT6jgY7MkaWMKLTyLAl3WbVcsZEu8cvOktKqIRDgzkY=
 github.com/byuoitav/common v0.0.0-20191031153011-56b526594c6b/go.mod h1:YTDTFEmez7HU3oyCIWjU3RfQ/P6v24LEzH5YUebph7I=
