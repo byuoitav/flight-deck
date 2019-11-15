@@ -9,10 +9,32 @@ import (
 	"golang.org/x/sys/unix"
 )
 
+func fixTime() error {
+	fmt.Printf("Fixing time\n")
+
+	cmd := exec.Command("ntpdate", "pool.ntp.org")
+	cmd.Stdout = os.Stdout
+	cmd.Stdin = os.Stdin
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("unable to fix time: %s", err)
+	}
+
+	return nil
+}
+
 func updateAndReboot() error {
 	data.Lock()
-	data.ProgressMessage = "updating apt"
+	data.ProgressMessage = "fixing time"
 	data.ProgressPercent = 5
+	data.Unlock()
+
+	if err := fixTime(); err != nil {
+		return err
+	}
+
+	data.Lock()
+	data.ProgressMessage = "updating apt"
+	data.ProgressPercent = 15
 	data.Unlock()
 
 	fmt.Printf("Updating apt\n")
@@ -28,7 +50,7 @@ func updateAndReboot() error {
 	fmt.Printf("\nUpgrading packages\n")
 
 	data.Lock()
-	data.ProgressPercent = 15
+	data.ProgressPercent = 30
 	data.ProgressMessage = "upgrading packages"
 	data.Unlock()
 

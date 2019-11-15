@@ -204,6 +204,10 @@ func setHostnameHandler(c echo.Context) error {
 	// if it works, then start the update process
 	go func() {
 		if err = updateAndReboot(); err != nil {
+			data.Lock()
+			data.Error = fmt.Errorf("failed to update and reboot: %s", err)
+			data.Unlock()
+
 			fmt.Printf("failed to update and reboot: %s\n", err)
 		}
 	}()
