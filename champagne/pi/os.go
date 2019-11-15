@@ -33,7 +33,7 @@ func updateAndReboot() error {
 	data.Unlock()
 
 	// upgrade packages
-	cmd = exec.Command("apt", "-y" "upgrade")
+	cmd = exec.Command("apt", "-y", "upgrade")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
@@ -48,7 +48,7 @@ func updateAndReboot() error {
 	data.Unlock()
 
 	// remove/clean leftover junk
-	cmd = exec.Command("apt", "-y" "autoremove")
+	cmd = exec.Command("apt", "-y", "autoremove")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
@@ -62,7 +62,7 @@ func updateAndReboot() error {
 	data.ProgressMessage = "cleaning apt cache"
 	data.Unlock()
 
-	cmd = exec.Command("apt", "-y" "autoclean")
+	cmd = exec.Command("apt", "-y", "autoclean")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
