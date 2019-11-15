@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
 	"time"
 
@@ -11,12 +12,20 @@ import (
 func updateAndReboot() error {
 	data.Lock()
 	data.ProgressMessage = "updating apt"
+	data.ProgressPercent = 5
 	data.Unlock()
 
+	fmt.Printf("Updating apt\n")
+
 	// update apt
-	if err := exec.Command("apt", "update").Run(); err != nil {
+	cmd := exec.Command("apt", "update")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("failed to run %q: %w", "apt update", err)
 	}
+
+	fmt.Printf("\nUpgrading packages\n")
 
 	data.Lock()
 	data.ProgressPercent = 15
@@ -24,9 +33,14 @@ func updateAndReboot() error {
 	data.Unlock()
 
 	// upgrade packages
-	if err := exec.Command("apt", "-y", "upgrade").Run(); err != nil {
+	cmd = exec.Command("apt", "-y" "upgrade")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("failed to run %q: %w", "apt -y upgrade", err)
 	}
+
+	fmt.Printf("\nRemoving leftover packages\n")
 
 	data.Lock()
 	data.ProgressPercent = 75
@@ -34,19 +48,28 @@ func updateAndReboot() error {
 	data.Unlock()
 
 	// remove/clean leftover junk
-	if err := exec.Command("apt", "-y", "autoremove").Run(); err != nil {
+	cmd = exec.Command("apt", "-y" "autoremove")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("failed to run %q: %w", "apt -y autoremove", err)
 	}
+
+	fmt.Printf("\nCleaning apt cache\n")
 
 	data.Lock()
 	data.ProgressPercent = 90
 	data.ProgressMessage = "cleaning apt cache"
 	data.Unlock()
 
-	if err := exec.Command("apt", "-y", "autoclean").Run(); err != nil {
+	cmd = exec.Command("apt", "-y" "autoclean")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("failed to run %q: %w", "apt -y autoclean", err)
 	}
 
+	fmt.Printf("\n\n\nDone! Rebooting!!\n")
 	data.Lock()
 	data.ProgressPercent = 99
 	data.ProgressMessage = "rebooting"

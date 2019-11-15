@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 
 #############################
-# log to champagne.log
-exec > /tmp/champagne.log 2>&1
 
 mkdir -p /etc/i3
 
@@ -12,6 +10,7 @@ until $(curl -fsSL https://raw.githubusercontent.com/byuoitav/flight-deck/master
 	sleep 10
 done
 
+# download champagne
 until $(curl -fsSL https://github.com/byuoitav/flight-deck/releases/download/v0.1.4/pi.tar.gz > /tmp/pi.tar.gz); do
 	echo "Unable to download pi setup server"
 	sleep 10
@@ -19,9 +18,12 @@ done
 
 tar -C /tmp -xzmf /tmp/pi.tar.gz
 
+# log to champagne.log
+exec > /tmp/champagne.log 2>&1
+
 cd /tmp && ./pi &
 
-sleep 10
+sleep 4
 startx
 ##############################
 
