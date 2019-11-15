@@ -35,7 +35,7 @@ type RouteData struct {
 	UseDHCP      bool
 
 	// progress
-	ProgressTitle string
+	ProgressTitle   string
 	ProgressMessage string
 	ProgressPercent int // 1 - 100
 
@@ -206,7 +206,7 @@ func setHostnameHandler(c echo.Context) error {
 		if err = updateAndReboot(); err != nil {
 			fmt.Printf("failed to update and reboot: %s\n", err)
 		}
-	}
+	}()
 
 	data.ProgressTitle = "Set Hostname - Updating Pi"
 	data.ProgressPercent = 0

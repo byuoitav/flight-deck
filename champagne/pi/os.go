@@ -58,4 +58,6 @@ func updateAndReboot() error {
 	if err := unix.Reboot(unix.LINUX_REBOOT_CMD_RESTART); err != nil {
 		return fmt.Errorf("failed to reboot: %w", err)
 	}
+
+	return nil
 }
