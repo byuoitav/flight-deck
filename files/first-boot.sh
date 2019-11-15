@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 #############################
-script -f /tmp/champagne.log
+# log to champagne.log
+exec > /tmp/champagne.log 2>&1
 
 mkdir -p /etc/i3
 
