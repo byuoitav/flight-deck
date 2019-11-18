@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	FloatURL         = "http://sandbag.byu.edu:8000/float"
+	FloatURL         = "http://sandbag.byu.edu:2001/float"
 	EnvironmentFile  = "/etc/environment"
 	DeploymentFile   = "/tmp/deployment.log"
 	SaltMinionFile   = "/etc/salt/minion"
