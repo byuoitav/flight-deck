@@ -13,13 +13,14 @@
     <script src="/static/js/bootstrap.min.js"></script>
     <script type="text/javascript">
       $(document).ready(function() {
-        window.location.pathname = '/float'
         $("#btnFetch").click(function() {
           $(this).prop("disabled", true);
           $(this).html(
             `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>Loadingg...`
           );
         });
+
+        window.location.pathname = "/float";
       });
     </script>
   </head>
@@ -30,8 +31,8 @@
       <br />
       <br />
       <br />
-      <h1>Success!</h1>
-      <h3>Please wait while the device is being floated to</h3>
+      <h1>Floating!</h1>
+      <h3>Please wait while the device is floated to</h3>
       <br />
       <div
         class="spinner-border"

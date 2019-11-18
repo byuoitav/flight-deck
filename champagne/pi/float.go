@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
@@ -23,10 +24,14 @@ var (
 )
 
 func float() error {
+	fmt.Printf("Floating...\n")
+
 	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, FloatURL, nil)
 	if err != nil {
 		return fmt.Errorf("%w: %s", ErrFloatFailed, err)
 	}
+
+	fmt.Printf("Making GET request to %s\n", FloatURL)
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -34,11 +39,12 @@ func float() error {
 	}
 	defer resp.Body.Close()
 
-	// idk if i need the body
-	//buf, err := ioutil.ReadAll(resp.Body)
-	//if err != nil {
-	//	return fmt.Errorf("%w: %w", ErrFloatFailed, err)
-	//}
+	buf, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("%w: %s", ErrFloatFailed, err)
+	}
+
+	fmt.Printf("Response:\n%s\n", buf)
 
 	switch resp.StatusCode {
 	case http.StatusOK:
