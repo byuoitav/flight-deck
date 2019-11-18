@@ -26,7 +26,7 @@ var (
 func float() error {
 	fmt.Printf("Floating...\n")
 
-	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, FloatURL, nil)
+	req, err := http.NewRequestWithContext(context.TODO(), http.MethodPost, FloatURL, nil)
 	if err != nil {
 		return fmt.Errorf("%w: %s", ErrFloatFailed, err)
 	}
@@ -60,8 +60,14 @@ func float() error {
 		}
 
 		return fmt.Errorf("deployment file never showed up")
+	case http.StatusForbidden:
+		return fmt.Errorf("%w: %s", ErrFloatFailed, buf)
+	case http.StatusNotFound:
+		return fmt.Errorf("%w: %s", ErrFloatFailed, buf)
+	case http.StatusInternalServerError:
+		return fmt.Errorf("%w: unkown error: %s", ErrFloatFailed, buf)
 	default:
-		return fmt.Errorf("%w: unkown status code %d", ErrFloatFailed, resp.StatusCode)
+		return fmt.Errorf("%w: unkown status code %d: %s", ErrFloatFailed, resp.StatusCode, buf)
 	}
 }
 
