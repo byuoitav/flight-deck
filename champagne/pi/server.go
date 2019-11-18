@@ -57,7 +57,6 @@ var (
 	ErrNotInDNS       = errors.New("hostname not found in DNS (qip)")
 	ErrHostnameExists = errors.New("hostname is already on the network")
 	ErrInvalidSubnet  = errors.New("given ip doesn't match current subnet")
-	ErrFloatFailed    = errors.New("failed to float")
 
 	data RouteData
 )
@@ -273,8 +272,30 @@ func ignoreSubnetHandler(c echo.Context) error {
 }
 
 func floatHandler(c echo.Context) error {
-	// hit the float endpoint
 	if len(data.ActualHostname) == 0 || data.ActualHostname == "raspberrypi" {
 		return c.Redirect(http.StatusTemporaryRedirect, "/redirect")
 	}
+
+	// hit the float endpoint
+	err := deploy()
+	data.Lock()
+	defer data.Unlock()
+
+	data.Error = err
+
+	switch {
+	case errors.Is(err, ErrFloatFailed):
+		return c.redirect(http.StatusTemporaryRedirect, "/floatingFailed")
+	case err != nil:
+		return c.Redirect(http.StatusTemporaryRedirect, "/pages/error")
+	}
+
+	go func() {
+		// start whatever needs to happen in the background
+	}()
+
+	data.ProgressTitle = "I'm Floating!"
+	data.ProgressPercent = 0
+
+	return c.Redirect(http.StatusTemporaryRedirect, "/pages/progress")
 }

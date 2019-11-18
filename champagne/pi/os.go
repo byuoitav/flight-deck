@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 
 	"golang.org/x/sys/unix"
@@ -98,10 +100,47 @@ func updateAndReboot() error {
 	data.Unlock()
 
 	time.Sleep(10 * time.Second)
+	return reboot()
+}
 
-	// reboot the pi (for more info, look at the man page for reboot(2))
-	if err := unix.Reboot(unix.LINUX_REBOOT_CMD_RESTART); err != nil {
-		return fmt.Errorf("failed to reboot: %w", err)
+func reboot() error {
+	// for more info, look at the man page for reboot(2)
+	return unix.Reboot(unix.LINUX_REBOOT_CMD_RESTART)
+}
+
+func source(file string) error {
+	f, err := os.Open(file)
+	if err != nil {
+		return fmt.Errorf("unable to open file: %w", err)
+	}
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+	env := make(map[string]string)
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		line = strings.TrimPrefix(line, "export ")
+		line = strings.TrimSpace(line)
+		if len(line) == 0 || strings.HasPrefix(line, "#") {
+			// skip empty lines & comments
+			continue
+		}
+
+		split := strings.SplitN(line, "=", 2)
+		if len(split) != 2 {
+			return fmt.Errorf("invalid line found: %q", line)
+		}
+
+		env[split[0]] = split[1]
+	}
+	if err := scanner.Err(); err != nil {
+		return fmt.Errorf("unable to scan file: %w", err)
+	}
+
+	// actually set the env vars
+	for k, v := range env {
+		os.Setenv(k, v)
 	}
 
 	return nil
