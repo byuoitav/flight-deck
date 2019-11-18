@@ -109,6 +109,7 @@ func reboot() error {
 }
 
 func source(file string) error {
+	fmt.Printf("Sourcing %q", file)
 	f, err := os.Open(file)
 	if err != nil {
 		return fmt.Errorf("unable to open file: %w", err)
@@ -140,6 +141,7 @@ func source(file string) error {
 
 	// actually set the env vars
 	for k, v := range env {
+		fmt.Printf("Setting %s=%s\n", k, v)
 		os.Setenv(k, v)
 	}
 

@@ -50,10 +50,11 @@ func float() error {
 	case http.StatusOK:
 		// wait for /tmp/deployment to show up
 		for i := 0; i < 32; i++ {
+			fmt.Printf("Looking for deployment file\n")
 			time.Sleep(1000 * time.Second)
-			i++
 
 			if _, err := os.Stat(DeploymentFile); os.IsNotExist(err) {
+				fmt.Printf("Got deployment file\n")
 				// get new env vars
 				return source(EnvironmentFile)
 			}
@@ -72,6 +73,8 @@ func float() error {
 }
 
 func saltDeployment() error {
+	fmt.Printf("Starting salt deployment\n")
+
 	data.Lock()
 	data.ProgressMessage = "creating salt minion file"
 	data.ProgressPercent = 10
