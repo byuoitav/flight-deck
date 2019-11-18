@@ -53,9 +53,8 @@ func float() error {
 			fmt.Printf("Looking for deployment file\n")
 			time.Sleep(1000 * time.Second)
 
-			if _, err := os.Stat(DeploymentFile); os.IsNotExist(err) {
+			if _, err := os.Stat(DeploymentFile); err != nil {
 				fmt.Printf("Got deployment file\n")
-				// get new env vars
 				return source(EnvironmentFile)
 			}
 		}
