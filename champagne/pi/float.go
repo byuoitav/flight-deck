@@ -51,9 +51,9 @@ func float() error {
 		// wait for /tmp/deployment to show up
 		for i := 0; i < 32; i++ {
 			fmt.Printf("Looking for deployment file\n")
-			time.Sleep(1000 * time.Second)
+			time.Sleep(1 * time.Second)
 
-			if _, err := os.Stat(DeploymentFile); err != nil {
+			if _, err := os.Stat(DeploymentFile); err == nil {
 				fmt.Printf("Got deployment file\n")
 				return source(EnvironmentFile)
 			}
