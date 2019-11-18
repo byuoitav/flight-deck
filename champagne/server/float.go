@@ -58,13 +58,18 @@ func (s *Server) handleFloat(c echo.Context) error {
 		// If not found in prd then try stg
 		log.L.Debugf("Device %s not found in prd, trying stg", name)
 		err = s.floatDevice(name, "stg")
+		if err != nil && errors.Is(err, errDeviceNotFound) {
+			// If not found in stg then try dev
+			log.L.Debugf("Device %s not found in stg, trying dev", name)
+			err = s.floatDevice(name, "dev")
+		}
 	}
 
-	// If there is still an error (stg returned an error too or not a not found error)
+	// If there is still an error (still not found or other error)
 	if err != nil {
 		log.L.Debugf("Got error: %s", err)
 		if errors.Is(err, errDeviceNotFound) {
-			msg := fmt.Sprintf("Device %s not found in prd or stg float-ship", name)
+			msg := fmt.Sprintf("Device %s not found in any flight-deck environment", name)
 			log.L.Infof(msg)
 			return echo.NewHTTPError(
 				http.StatusNotFound,
