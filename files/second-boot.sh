@@ -2,28 +2,6 @@
 
 echo "Second boot."
 
-#############################
-#mkdir -p /etc/i3
-#
-## download i3 config
-#until $(curl -fsSL https://raw.githubusercontent.com/byuoitav/flight-deck/master/files/setupi3config > /etc/i3/config); do
-#	echo "Unable to download pi setup server"
-#	sleep 10
-#done
-#
-#until $(curl -fsSL https://github.com/byuoitav/flight-deck/releases/download/v0.1.4/pi.tar.gz > /tmp/pi.tar.gz); do
-#	echo "Unable to download pi setup server"
-#	sleep 10
-#done
-#
-#tar -C /tmp -xzmf /tmp/pi.tar.gz
-#
-#cd /tmp && ./pi &
-#
-#sleep 10
-#startx
-##############################
-
 # wait for a deployment
 until [ -f "/tmp/deployment.log" ]; do
     echo "Use the av-cli to float to $(hostname)"
@@ -46,7 +24,7 @@ echo "master_finger: $SALT_MASTER_FINGER" >> /etc/salt/minion
 echo "startup_states: 'highstate'" >> /etc/salt/minion
 
 # setup minion id
-echo $SYSTEM_ID > /etc/salt/minion_id
+# echo $SYSTEM_ID > /etc/salt/minion_id
 
 # make changes take effect
 echo "Starting salt highstate; This should take ~1 minutes"

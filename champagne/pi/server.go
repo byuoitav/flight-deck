@@ -57,6 +57,7 @@ var (
 	ErrNotInDNS       = errors.New("hostname not found in DNS (qip)")
 	ErrHostnameExists = errors.New("hostname is already on the network")
 	ErrInvalidSubnet  = errors.New("given ip doesn't match current subnet")
+	ErrFloatFailed    = errors.New("failed to float")
 
 	data RouteData
 )
@@ -88,6 +89,9 @@ func main() {
 	e.GET("/useDHCP", allowDHCPHandler)
 	e.GET("/hostname/", emptyHostnameHandler) // catch empty hostnames
 	e.GET("/hostname/:hostname", hostnameSetHandler)
+
+	// float/second boot stuff (set hn/ip)
+	e.GET("/float", floatHandler)
 
 	// update current data every 10 seconds
 	go func() {
@@ -266,4 +270,11 @@ func ignoreSubnetHandler(c echo.Context) error {
 	}
 
 	return c.Redirect(http.StatusTemporaryRedirect, "/pages/start")
+}
+
+func floatHandler(c echo.Context) error {
+	// hit the float endpoint
+	if len(data.ActualHostname) == 0 || data.ActualHostname == "raspberrypi" {
+		return c.Redirect(http.StatusTemporaryRedirect, "/redirect")
+	}
 }
