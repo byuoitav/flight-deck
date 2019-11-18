@@ -285,7 +285,7 @@ func floatHandler(c echo.Context) error {
 
 	switch {
 	case errors.Is(err, ErrFloatFailed):
-		return c.redirect(http.StatusTemporaryRedirect, "/floatingFailed")
+		return c.Redirect(http.StatusTemporaryRedirect, "/floatingFailed")
 	case err != nil:
 		return c.Redirect(http.StatusTemporaryRedirect, "/pages/error")
 	}
