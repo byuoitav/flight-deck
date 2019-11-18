@@ -4,13 +4,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/http"
+	"os"
+	"time"
 )
 
 const (
-	FloatFormat     = "http://sandbag.byu.edu:10000/float"
-	EnvironmentFile = "/etc/environment"
+	FloatURL         = "http://sandbag.byu.edu:10000/float"
+	EnvironmentFile  = "/etc/environment"
+	DeploymentFile   = "/tmp/deployment.log"
+	SaltMinionFile   = "/etc/salt/minion"
+	SaltMinionIDFile = "/etc/salt/minion_id"
 )
 
 var (
@@ -18,9 +22,7 @@ var (
 )
 
 func float() error {
-	url := fmt.Printf(FloatTemplate, id)
-
-	req, err := http.NewRequestWithContext(context.TODO, http.MethodGet, url, nil)
+	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, FloatURL, nil)
 	if err != nil {
 		return fmt.Errorf("%w: %w", ErrFloatFailed, err)
 	}
@@ -31,14 +33,28 @@ func float() error {
 	}
 	defer resp.Body.Close()
 
-	buf, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return fmt.Errorf("%w: %w", ErrFloatFailed, err)
-	}
+	// idk if i need the body
+	//buf, err := ioutil.ReadAll(resp.Body)
+	//if err != nil {
+	//	return fmt.Errorf("%w: %w", ErrFloatFailed, err)
+	//}
 
 	switch resp.StatusCode {
 	case http.StatusOK:
 		// wait for /tmp/deployment to show up
+		count := 0
+		for {
+			time.Sleep(1000 * time.Second)
+			count++
+
+			if _, err := os.Stat(DeploymentFile); os.IsNotExist(err) {
+				return fmt.Errorf("deployment file never showed up")
+			}
+
+			if count > 30 {
+				// deployment must have failed
+			}
+		}
 
 		// get new env vars
 		return source(EnvironmentFile)
@@ -48,4 +64,12 @@ func float() error {
 }
 
 func saltDeployment() error {
+	//minionFile, err := os.Create(SaltMinionFile)
+	//if err != nil {
+	//	return fmt.Errorf("faield to create minion file: %w", err)
+	//}
+
+	// minionFile.Write()
+
+	return nil
 }

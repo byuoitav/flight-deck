@@ -277,7 +277,7 @@ func floatHandler(c echo.Context) error {
 	}
 
 	// hit the float endpoint
-	err := deploy()
+	err := float()
 	data.Lock()
 	defer data.Unlock()
 
@@ -285,13 +285,20 @@ func floatHandler(c echo.Context) error {
 
 	switch {
 	case errors.Is(err, ErrFloatFailed):
-		return c.redirect(http.StatusTemporaryRedirect, "/floatingFailed")
+		return c.Redirect(http.StatusTemporaryRedirect, "/floatingFailed")
 	case err != nil:
 		return c.Redirect(http.StatusTemporaryRedirect, "/pages/error")
 	}
 
 	go func() {
 		// start whatever needs to happen in the background
+		if err = saltDeployment(); err != nil {
+			data.Lock()
+			data.Error = fmt.Errorf("failed to do salt deployment: %w", err)
+			data.Unlock()
+
+			fmt.Printf("failed to do salt deployment: %s\n", err)
+		}
 	}()
 
 	data.ProgressTitle = "I'm Floating!"
