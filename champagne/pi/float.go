@@ -25,12 +25,12 @@ var (
 func float() error {
 	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, FloatURL, nil)
 	if err != nil {
-		return fmt.Errorf("%w: %w", ErrFloatFailed, err)
+		return fmt.Errorf("%w: %s", ErrFloatFailed, err)
 	}
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return fmt.Errorf("%w: %w", ErrFloatFailed, err)
+		return fmt.Errorf("%w: %s", ErrFloatFailed, err)
 	}
 	defer resp.Body.Close()
 
@@ -43,22 +43,17 @@ func float() error {
 	switch resp.StatusCode {
 	case http.StatusOK:
 		// wait for /tmp/deployment to show up
-		count := 0
-		for {
+		for i := 0; i < 32; i++ {
 			time.Sleep(1000 * time.Second)
-			count++
+			i++
 
 			if _, err := os.Stat(DeploymentFile); os.IsNotExist(err) {
-				return fmt.Errorf("deployment file never showed up")
-			}
-
-			if count > 30 {
-				// deployment must have failed
+				// get new env vars
+				return source(EnvironmentFile)
 			}
 		}
 
-		// get new env vars
-		return source(EnvironmentFile)
+		return fmt.Errorf("deployment file never showed up")
 	default:
 		return fmt.Errorf("%w: unkown status code %d", ErrFloatFailed, resp.StatusCode)
 	}
