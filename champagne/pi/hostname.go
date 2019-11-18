@@ -8,6 +8,10 @@ import (
 	"github.com/sparrc/go-ping"
 )
 
+const (
+	Domain = ".byu.edu"
+)
+
 func setHostname(hn string, ignoreSubnet bool, useDHCP bool) error {
 	fmt.Printf("Setting hostname to %s (ignoreSubnet: %v, useDHCP: %v)\n", hn, ignoreSubnet, useDHCP)
 
@@ -40,7 +44,6 @@ func setHostname(hn string, ignoreSubnet bool, useDHCP bool) error {
 	if !useDHCP {
 		fmt.Printf("Address found for %s%s in DNS: %s\n", hn, Domain, ip.IP.String())
 	}
-
 	// try pinging that IP
 	var pinger *ping.Pinger
 	if ip.IP != nil {

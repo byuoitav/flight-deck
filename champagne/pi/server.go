@@ -14,13 +14,6 @@ import (
 	"github.com/labstack/echo"
 )
 
-const (
-	HostnameFile = "/etc/hostname"
-	DHCPFile     = "/etc/dhcpcd.conf"
-
-	Domain = ".byu.edu"
-)
-
 type RouteData struct {
 	// auto updating
 	IPs            map[string]string

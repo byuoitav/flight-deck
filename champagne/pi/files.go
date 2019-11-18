@@ -7,6 +7,12 @@ import (
 	"strings"
 )
 
+const (
+	HostnameFile = "/etc/hostname"
+	DHCPFile     = "/etc/dhcpcd.conf"
+	HostsFile    = "/etc/hosts"
+)
+
 func changeHostname(hn string) error {
 	f, err := os.Create(HostnameFile)
 	if err != nil {
@@ -22,11 +28,27 @@ func changeHostname(hn string) error {
 		return fmt.Errorf("failed to write: wrote %v/%v bytes", n, len(hn))
 	}
 
+	// update /etc/hosts
+	hostsFile, err := os.OpenFile(HostsFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return fmt.Errorf("failed to open file %q: %w", HostsFile, err)
+	}
+	defer hostsFile.Close()
+
+	toWrite := fmt.Sprintf("127.0.0.1\t%s", hn)
+	n, err = f.WriteString(toWrite)
+	switch {
+	case err != nil:
+		return fmt.Errorf("failed to write: %w", err)
+	case len(hn) != n:
+		return fmt.Errorf("failed to write: wrote %v/%v bytes", n, len(toWrite))
+	}
+
 	return nil
 }
 
 func changeIP(ip *net.IPNet) error {
-	// copy to backup
+	// TODO copy to backup
 
 	f, err := os.OpenFile(DHCPFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
