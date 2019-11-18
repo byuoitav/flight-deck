@@ -56,7 +56,7 @@ func setHostname(hn string, ignoreSubnet bool, useDHCP bool) error {
 	}
 
 	fmt.Printf("Pinging %s...\n", pinger.Addr())
-
+	pinger.SetPrivileged(true)
 	pinger.Timeout = 5 * time.Second
 	pinger.Count = 3
 	pinger.Run()

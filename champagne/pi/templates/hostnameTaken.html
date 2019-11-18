@@ -22,14 +22,17 @@
 
     <body>
         <div class="container">                
-            <div id="hostname-form" style="margin-top: 20%">
+            <div id="hostname-form">
                 <h1>The host name you entered is already taken.</h1>
                 <ul>
                     <li>Please restart and verify that the host name was inputed correctly</li>
                     <li>Please check QIP and reslove the issue</li>
                 </ul>
                 <div class="text-center">
-                    <button class="btn btn-lg btn-danger" id="restartButton">Restart</button> 
+                    <button class="btn btn-lg btn-danger"
+                    id="restartButton"
+                    onClick="window.location.pathname = '/pages/redirect'"
+                    >Restart</button> 
                 </span>
             </div> 
         </div>
