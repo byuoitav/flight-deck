@@ -142,7 +142,10 @@ func source(file string) error {
 	// actually set the env vars
 	for k, v := range env {
 		fmt.Printf("Setting %s=%s\n", k, v)
-		os.Setenv(k, v)
+
+		if err := os.Setenv(k, v); err != nil {
+			return fmt.Errorf("failed to set %q: %w", k, err)
+		}
 	}
 
 	return nil

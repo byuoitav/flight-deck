@@ -135,20 +135,22 @@ func main() {
 	}
 }
 
+func resetData() {
+	data.Lock()
+	defer data.Unlock()
+
+	data.DesiredHostname = ""
+	data.AssignedIP = ""
+	data.Error = nil
+	data.UseDHCP = false
+	data.IgnoreSubnet = false
+}
+
 func serveHTMLHandler(c echo.Context) error {
 	pageName := path.Base(c.Request().URL.Path)
 
 	data.Lock()
 	defer data.Unlock()
-
-	// reset data on start page
-	if pageName == "start" {
-		data.DesiredHostname = ""
-		data.AssignedIP = ""
-		data.Error = nil
-		data.UseDHCP = false
-		data.IgnoreSubnet = false
-	}
 
 	err := c.Render(http.StatusOK, pageName+".html", data)
 	if err != nil {
@@ -159,6 +161,9 @@ func serveHTMLHandler(c echo.Context) error {
 }
 
 func redirectHandler(c echo.Context) error {
+	// reset data
+	resetData()
+
 	hostname, err := os.Hostname()
 	if err != nil {
 		data.Lock()
@@ -268,6 +273,8 @@ func floatHandler(c echo.Context) error {
 	if len(data.ActualHostname) == 0 || data.ActualHostname == "raspberrypi" {
 		return c.Redirect(http.StatusTemporaryRedirect, "/redirect")
 	}
+
+	resetData()
 
 	// hit the float endpoint
 	err := float()
