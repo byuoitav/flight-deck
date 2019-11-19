@@ -40,7 +40,7 @@ func changeHostname(hn string) error {
 	switch {
 	case err != nil:
 		return fmt.Errorf("failed to write: %w", err)
-	case len(hn) != n:
+	case len(toWrite) != n:
 		return fmt.Errorf("failed to write: wrote %v/%v bytes", n, len(toWrite))
 	}
 
