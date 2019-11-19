@@ -154,7 +154,7 @@ func saltDeployment() error {
 	// wait for deployment stuff to finish
 	fmt.Printf("waiting for deployment to finish (5 minutes).\ncur time: %v\n", time.Now())
 	for i := 0; i < 30; i++ {
-		time.Sleep(10 * time.Second)
+		time.Sleep(7 * time.Second)
 		data.Lock()
 
 		// these are so random, but i want to make salt look like it takes longer :)
@@ -171,21 +171,30 @@ func saltDeployment() error {
 		data.Unlock()
 	}
 
-	// disable myself
+	// schedule a reboot (will shutdown in 1 minute)
+	cmd = exec.Command("shutdown", "-r")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("failed to run %q: %w", "shutdown -r", err)
+	}
+
+	data.Lock()
+	data.ProgressMessage = "finished! rebooting in 1 minute."
+	data.ProgressPercent = 99
+	fmt.Printf("%s\n", data.ProgressMessage)
+	data.Unlock()
+
+	// so that the ui can refresh
+	time.Sleep(30 * time.Second)
+
+	// disable myself (will kill the program!!!!)
 	cmd = exec.Command("systemctl", "disable", "pi-setup.service")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("failed to run %q: %w", "systemctl restart salt-minion", err)
+		return fmt.Errorf("failed to run %q: %w", "systemctl disable pi-setup.service", err)
 	}
 
-	data.Lock()
-	data.ProgressMessage = "finished! rebooting!"
-	data.ProgressPercent = 99
-
-	fmt.Printf("%s\n", data.ProgressMessage)
-	data.Unlock()
-
-	time.Sleep(5 * time.Second)
-	return reboot()
+	return nil
 }
