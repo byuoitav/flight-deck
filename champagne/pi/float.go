@@ -83,7 +83,7 @@ func saltDeployment() error {
 
 	minionFile, err := os.Create(SaltMinionFile)
 	if err != nil {
-		return fmt.Errorf("faield to create minion file: %w", err)
+		return fmt.Errorf("failed to create minion file: %w", err)
 	}
 	defer minionFile.Close()
 
@@ -132,7 +132,7 @@ func saltDeployment() error {
 	data.Unlock()
 
 	// delete minion id file
-	if err := os.Remove(SaltMinionIDFile); err != nil {
+	if err := os.Remove(SaltMinionIDFile); err != nil && !os.IsNotExist(err) {
 		return fmt.Errorf("failed to remove salt minion file: %w", err)
 	}
 
