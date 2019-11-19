@@ -131,9 +131,24 @@ func saltDeployment() error {
 	fmt.Printf("%s\n", data.ProgressMessage)
 	data.Unlock()
 
-	// delete minion id file
-	if err := os.Remove(SaltMinionIDFile); err != nil && !os.IsNotExist(err) {
+	// write minion id file
+	idFile, err := os.Create(SaltMinionIDFile)
+	if err != nil {
 		return fmt.Errorf("failed to remove salt minion file: %w", err)
+	}
+	defer idFile.Close()
+
+	hn, err := os.Hostname()
+	if err != nil {
+		return fmt.Errorf("failed to get hostname: %w", err)
+	}
+
+	n, err = idFile.WriteString(hn)
+	switch {
+	case err != nil:
+		return fmt.Errorf("unable to write to minion id file: %w", err)
+	case n != len(hn):
+		return fmt.Errorf("unable to write to minion id file: wrote %v/%v bytes", n, len(hn))
 	}
 
 	data.Lock()
