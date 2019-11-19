@@ -35,8 +35,8 @@ func changeHostname(hn string) error {
 	}
 	defer hostsFile.Close()
 
-	toWrite := fmt.Sprintf("127.0.0.1\t%s", hn)
-	n, err = f.WriteString(toWrite)
+	toWrite := fmt.Sprintf("\n127.0.0.1\t%s", hn)
+	n, err = hostsFile.WriteString(toWrite)
 	switch {
 	case err != nil:
 		return fmt.Errorf("failed to write: %w", err)
@@ -64,7 +64,7 @@ func changeIP(ip *net.IPNet) error {
 	var str strings.Builder
 
 	// TODO interface name
-	str.WriteString("interface eth0\n")
+	str.WriteString("\ninterface eth0\n")
 	str.WriteString(fmt.Sprintf("static ip_address=%s\n", ip.String()))
 	str.WriteString(fmt.Sprintf("static routers=%s\n", router.String()))
 	str.WriteString("static domain_name_servers=127.0.0.1 10.8.0.19 10.8.0.26\n")

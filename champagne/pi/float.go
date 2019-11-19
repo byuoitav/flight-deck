@@ -95,7 +95,7 @@ func saltDeployment() error {
 	data.Unlock()
 
 	// write master address
-	str := fmt.Sprintf("master: %s", os.Getenv("SALT_MASTER_HOST"))
+	str := fmt.Sprintf("master: %s\n", os.Getenv("SALT_MASTER_HOST"))
 	n, err := minionFile.WriteString(str)
 	switch {
 	case err != nil:
@@ -105,7 +105,7 @@ func saltDeployment() error {
 	}
 
 	// write master finger
-	str = fmt.Sprintf("master_finger: %s", os.Getenv("SALT_MASTER_FINGER"))
+	str = fmt.Sprintf("master_finger: %s\n", os.Getenv("SALT_MASTER_FINGER"))
 	n, err = minionFile.WriteString(str)
 	switch {
 	case err != nil:
@@ -115,7 +115,7 @@ func saltDeployment() error {
 	}
 
 	// write startup states
-	str = fmt.Sprintf("startup_states: 'highstate'")
+	str = fmt.Sprintf("startup_states: 'highstate'\n")
 	n, err = minionFile.WriteString(str)
 	switch {
 	case err != nil:
