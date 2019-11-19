@@ -1,10 +1,12 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"os"
 	"strings"
+	"time"
 )
 
 const (
@@ -12,6 +14,27 @@ const (
 	DHCPFile     = "/etc/dhcpcd.conf"
 	HostsFile    = "/etc/hosts"
 )
+
+func waitForFile(ctx context.Context, name string, checkForContent bool) error {
+	ticker := time.NewTicker(500 * time.Millisecond)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			stats, err := os.Stat(name)
+			if err != nil {
+				continue // file doesn't exist yet
+			}
+
+			if !checkForContent || stats.Size() > 0 {
+				return nil
+			}
+		case <-ctx.Done():
+			return ctx.Err()
+		}
+	}
+}
 
 func changeHostname(hn string) error {
 	f, err := os.Create(HostnameFile)

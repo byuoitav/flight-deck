@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"strings"
@@ -12,7 +13,7 @@ import (
 )
 
 func fixTime() error {
-	fmt.Printf("Fixing time\n")
+	log.Printf("Fixing time")
 
 	cmd := exec.Command("ntpdate", "tick.byu.edu")
 	cmd.Stdout = os.Stdout
@@ -39,7 +40,7 @@ func updateAndReboot() error {
 	data.ProgressPercent = 15
 	data.Unlock()
 
-	fmt.Printf("Updating apt\n")
+	log.Printf("Updating apt")
 
 	// update apt
 	cmd := exec.Command("apt", "update")
@@ -49,7 +50,7 @@ func updateAndReboot() error {
 		return fmt.Errorf("failed to run %q: %w", "apt update", err)
 	}
 
-	fmt.Printf("\nUpgrading packages\n")
+	log.Printf("\nUpgrading packages")
 
 	data.Lock()
 	data.ProgressPercent = 30
@@ -64,7 +65,7 @@ func updateAndReboot() error {
 		return fmt.Errorf("failed to run %q: %w", "apt -y upgrade", err)
 	}
 
-	fmt.Printf("\nRemoving leftover packages\n")
+	log.Printf("\nRemoving leftover packages")
 
 	data.Lock()
 	data.ProgressPercent = 75
@@ -79,7 +80,7 @@ func updateAndReboot() error {
 		return fmt.Errorf("failed to run %q: %w", "apt -y autoremove", err)
 	}
 
-	fmt.Printf("\nCleaning apt cache\n")
+	log.Printf("\nCleaning apt cache")
 
 	data.Lock()
 	data.ProgressPercent = 90
@@ -93,7 +94,7 @@ func updateAndReboot() error {
 		return fmt.Errorf("failed to run %q: %w", "apt -y autoclean", err)
 	}
 
-	fmt.Printf("\n\n\nDone! Rebooting!!\n")
+	log.Printf("\n\n\nDone! Rebooting!!")
 	data.Lock()
 	data.ProgressPercent = 99
 	data.ProgressMessage = "rebooting"
@@ -109,7 +110,7 @@ func reboot() error {
 }
 
 func source(file string) error {
-	fmt.Printf("Sourcing %q", file)
+	log.Printf("Sourcing %q", file)
 	f, err := os.Open(file)
 	if err != nil {
 		return fmt.Errorf("unable to open file: %w", err)
@@ -141,7 +142,7 @@ func source(file string) error {
 
 	// actually set the env vars
 	for k, v := range env {
-		fmt.Printf("Setting %s=%s\n", k, v)
+		log.Printf("Setting %s=%s", k, v)
 
 		if err := os.Setenv(k, v); err != nil {
 			return fmt.Errorf("failed to set %q: %w", k, err)

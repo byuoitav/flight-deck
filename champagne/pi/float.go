@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"os/exec"
@@ -24,14 +25,14 @@ var (
 )
 
 func float() error {
-	fmt.Printf("Floating...\n")
+	log.Printf("Floating...")
 
 	req, err := http.NewRequestWithContext(context.TODO(), http.MethodPost, FloatURL, nil)
 	if err != nil {
 		return fmt.Errorf("%w: %s", ErrFloatFailed, err)
 	}
 
-	fmt.Printf("Making GET request to %s\n", FloatURL)
+	log.Printf("Making GET request to %s", FloatURL)
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -44,22 +45,27 @@ func float() error {
 		return fmt.Errorf("%w: %s", ErrFloatFailed, err)
 	}
 
-	fmt.Printf("Response:\n%s\n", buf)
+	log.Printf("Response:\n%s", buf)
 
 	switch resp.StatusCode {
 	case http.StatusOK:
-		// wait for /tmp/deployment to show up
-		for i := 0; i < 32; i++ {
-			fmt.Printf("Looking for deployment file\n")
-			time.Sleep(1 * time.Second)
+		// wait for deployment file and environment file
+		ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
+		defer cancel()
 
-			if _, err := os.Stat(DeploymentFile); err == nil {
-				fmt.Printf("Got deployment file\n")
-				return source(EnvironmentFile)
-			}
+		log.Printf("Waiting for deployment file...")
+
+		if err := waitForFile(ctx, DeploymentFile, false); err != nil {
+			return fmt.Errorf("deployment file never showed up: %s", err)
 		}
 
-		return fmt.Errorf("deployment file never showed up")
+		log.Printf("Waiting for environment file...")
+
+		if err := waitForFile(ctx, EnvironmentFile, true); err != nil {
+			return fmt.Errorf("environment file never showed up: %s", err)
+		}
+
+		return source(EnvironmentFile)
 	case http.StatusForbidden:
 		return fmt.Errorf("%w: %s", ErrFloatFailed, buf)
 	case http.StatusNotFound:
@@ -72,13 +78,13 @@ func float() error {
 }
 
 func saltDeployment() error {
-	fmt.Printf("Starting salt deployment\n")
+	log.Printf("Starting salt deployment")
 
 	data.Lock()
 	data.ProgressMessage = "creating salt minion file"
 	data.ProgressPercent = 10
 
-	fmt.Printf("%s\n", data.ProgressMessage)
+	log.Printf("%s", data.ProgressMessage)
 	data.Unlock()
 
 	minionFile, err := os.Create(SaltMinionFile)
@@ -91,7 +97,7 @@ func saltDeployment() error {
 	data.ProgressMessage = "writing salt minion file"
 	data.ProgressPercent = 15
 
-	fmt.Printf("%s\n", data.ProgressMessage)
+	log.Printf("%s", data.ProgressMessage)
 	data.Unlock()
 
 	// write master address
@@ -128,7 +134,7 @@ func saltDeployment() error {
 	data.ProgressMessage = "deleting salt minion id file"
 	data.ProgressPercent = 30
 
-	fmt.Printf("%s\n", data.ProgressMessage)
+	log.Printf("%s", data.ProgressMessage)
 	data.Unlock()
 
 	// write minion id file
@@ -155,7 +161,7 @@ func saltDeployment() error {
 	data.ProgressMessage = "restarting salt minion"
 	data.ProgressPercent = 35
 
-	fmt.Printf("%s\n", data.ProgressMessage)
+	log.Printf("%s", data.ProgressMessage)
 	data.Unlock()
 
 	// restart salt minion
@@ -167,7 +173,7 @@ func saltDeployment() error {
 	}
 
 	// wait for deployment stuff to finish
-	fmt.Printf("waiting for deployment to finish (5 minutes).\ncur time: %v\n", time.Now())
+	log.Printf("waiting for deployment to finish (5 minutes).\ncur time: %v", time.Now())
 	for i := 0; i < 30; i++ {
 		time.Sleep(7 * time.Second)
 		data.Lock()
@@ -197,7 +203,7 @@ func saltDeployment() error {
 	data.Lock()
 	data.ProgressMessage = "finished! rebooting in 1 minute."
 	data.ProgressPercent = 99
-	fmt.Printf("%s\n", data.ProgressMessage)
+	log.Printf("%s", data.ProgressMessage)
 	data.Unlock()
 
 	// so that the ui can refresh

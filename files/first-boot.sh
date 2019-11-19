@@ -27,14 +27,6 @@ startx
 
 ##############################
 # ############
-# # check if script has already been started
-# if [ -f "$started" ]; then
-# 	echo "setup has been started remotely"
-# 	echo "please wait for me to reboot (~20 minutes)"
-# 	sleep infinity
-# 	exit
-# fi
-
 # # get the desired hostname
 # while true; do
 #     # get hostname
@@ -49,9 +41,6 @@ startx
 #         continue
 #     fi
 # done
-
-# # start
-# touch $started
 
 # # copy original dhcp file
 # cp /etc/dhcpcd.conf /etc/dhcpcd.conf.other

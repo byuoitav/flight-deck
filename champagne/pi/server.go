@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"path"
@@ -57,7 +58,7 @@ var (
 func main() {
 	// check that we are root
 	if os.Getuid() != 0 {
-		fmt.Printf("must be run as root\n")
+		log.Printf("must be run as root")
 		os.Exit(1)
 	}
 
@@ -93,7 +94,7 @@ func main() {
 
 			ips, err := getIPs()
 			if err != nil {
-				fmt.Printf("failed to get current ips: %s\n", err)
+				log.Printf("failed to get current ips: %s", err)
 				return
 			}
 
@@ -111,7 +112,7 @@ func main() {
 
 			hn, err := os.Hostname()
 			if err != nil {
-				fmt.Printf("failed to get current hostname: %s\n", err)
+				log.Printf("failed to get current hostname: %s", err)
 				return
 			}
 
@@ -130,7 +131,7 @@ func main() {
 	}()
 
 	if err := e.Start(":80"); err != nil {
-		fmt.Printf("failed to start server: %s\n", err)
+		log.Printf("failed to start server: %s", err)
 		os.Exit(1)
 	}
 }
@@ -154,7 +155,7 @@ func serveHTMLHandler(c echo.Context) error {
 
 	err := c.Render(http.StatusOK, pageName+".html", data)
 	if err != nil {
-		fmt.Printf("error rendering template %s: %v", pageName, err)
+		log.Printf("error rendering template %s: %v", pageName, err)
 	}
 
 	return err
@@ -187,18 +188,18 @@ func setHostnameHandler(c echo.Context) error {
 	err := setHostname(data.DesiredHostname, data.IgnoreSubnet, data.UseDHCP)
 	switch {
 	case errors.Is(err, ErrNotInDNS):
-		fmt.Printf("redirecting to 'not in dns' page\n\n")
+		log.Printf("redirecting to 'not in dns' page\n\n")
 		return c.Redirect(http.StatusTemporaryRedirect, "/pages/useDHCP")
 	case errors.Is(err, ErrHostnameExists):
-		fmt.Printf("redirecting to 'hostname already exists' page\n\n")
+		log.Printf("redirecting to 'hostname already exists' page\n\n")
 		return c.Redirect(http.StatusTemporaryRedirect, "/pages/hostnameTaken")
 	case errors.Is(err, ErrInvalidSubnet):
-		fmt.Printf("redirecting to 'invalid subnet' page\n\n")
+		log.Printf("redirecting to 'invalid subnet' page\n\n")
 		return c.Redirect(http.StatusTemporaryRedirect, "/pages/wrongSubnet")
 	case err != nil:
 		data.Error = err
 
-		fmt.Printf("redirecting to 'error' page with error: %s\n\n", data.Error)
+		log.Printf("redirecting to 'error' page with error: %s\n\n", data.Error)
 		return c.Redirect(http.StatusTemporaryRedirect, "/pages/error")
 	}
 
@@ -209,7 +210,7 @@ func setHostnameHandler(c echo.Context) error {
 			data.Error = fmt.Errorf("failed to update and reboot: %s", err)
 			data.Unlock()
 
-			fmt.Printf("failed to update and reboot: %s\n", err)
+			log.Printf("failed to update and reboot: %s", err)
 		}
 	}()
 
@@ -297,7 +298,7 @@ func floatHandler(c echo.Context) error {
 			data.Error = fmt.Errorf("failed to do salt deployment: %w", err)
 			data.Unlock()
 
-			fmt.Printf("failed to do salt deployment: %s\n", err)
+			log.Printf("failed to do salt deployment: %s", err)
 		}
 	}()
 
