@@ -188,7 +188,7 @@ func redirectHandler(c echo.Context) error {
 		return c.Redirect(http.StatusTemporaryRedirect, "/pages/error")
 	}
 
-	if hostname == "raspberrypi" {
+	if hostname == "raspberrypi" || hostname == "alp" {
 		return c.Redirect(http.StatusTemporaryRedirect, "/pages/start")
 	}
 
@@ -272,7 +272,7 @@ func allowDHCPHandler(c echo.Context) error {
 		data.UseDHCP = true
 		data.Unlock()
 
-		return c.Redirect(http.StatusTemporaryRedirect, "/pages/checkingHostname")
+		return c.Redirect(http.StatusTemporaryRedirect, "/pages/checkingHostname"+"?hostname="+data.DesiredHostname)
 	}
 
 	return c.Redirect(http.StatusTemporaryRedirect, "/pages/start")
@@ -284,7 +284,7 @@ func ignoreSubnetHandler(c echo.Context) error {
 		data.IgnoreSubnet = true
 		data.Unlock()
 
-		return c.Redirect(http.StatusTemporaryRedirect, "/pages/checkingHostname")
+		return c.Redirect(http.StatusTemporaryRedirect, "/pages/checkingHostname"+"?hostname="+data.DesiredHostname)
 	}
 
 	return c.Redirect(http.StatusTemporaryRedirect, "/pages/start")

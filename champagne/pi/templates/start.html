@@ -35,8 +35,9 @@
 
         $("#hostnameButton").click(function() {
           var hostname = $("#hostname").val();
-          window.location.pathname =
-            "/pages/checkingHostname?hostname=" + hostname;
+          window.location.replace(
+            "/pages/checkingHostname" + "?hostname=" + hostname
+          );
         });
       });
     </script>
