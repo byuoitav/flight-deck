@@ -12,32 +12,38 @@
     <script src="/static/js/popper.min.js"></script>
     <script src="/static/js/bootstrap.min.js"></script>
     <script type="text/javascript">
-      $(document).ready(function() {
-        $.ajax({
-          url: "",
-          type: "GET",
-
-          success: function(data) {}
-        });
-      });
+      $(document).ready(function() {});
     </script>
   </head>
 
   <body>
     <div class="container">
       <div id="hostname-form">
-        <h1>
-          The IP Address of the Pi is not valid for the port it is
-          connected to
-        </h1>
-        <h2>The Pi may not work as expected.</h2>
+        <h2>
+          The IP Address for the hostname you entered ({{.DesiredHostname}}) is
+          currently configured for a different subnet than the one this device
+          is currently connected to.
+        </h2>
+        <h5>
+          You can continue with the first half of the configuration process now,
+          but the device will not be able to complete its setup until it's
+          connected to the correct subnet.
+        </h5>
+        <br />
+        <h4>Troubleshooting</h4>
         <ul>
-          <li>The switch may not be configured properly</li>
-          <li>The pi may be connected to the wrong port</li>
+          <li>Check that the switch is configured properly</li>
           <li>
-            If you are are setting up a pi in a different room then click
-            continue
+            Check that this device is connected to the correct switch port
           </li>
+          <li>Check that the DNS entry is correct</li>
+          <ul>
+            <li>IP in DNS for {{.DesiredHostname}}: {{.AssignedIP}}</li>
+            <li>
+              Current IP(s) of device: {{range _, $value := .IPs }} {{ $value }}
+              {{end}}
+            </li>
+          </ul>
         </ul>
         <div class="text-center">
           <button
@@ -52,7 +58,7 @@
             id="restartButton"
             onclick="window.location.pathname = '/pages/redirect'"
           >
-            Restart
+            Start Over
           </button>
         </div>
       </div>

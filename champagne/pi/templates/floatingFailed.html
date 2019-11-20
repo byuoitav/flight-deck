@@ -23,10 +23,12 @@
       <h1>Failed!</h1>
       <h3>An error occured in the floating process</h3>
       <br />
+      <h4>{{ .Error }}</h4>
       <button
-      class="btn btn-outline-danger btn-lg"
-      type="button"
-      onClick="window.location.pathname = '/pages/floating'">
+        class="btn btn-outline-danger btn-lg"
+        type="button"
+        onClick="window.location.pathname = '/pages/floating'"
+      >
         Re-Float
       </button>
     </div>

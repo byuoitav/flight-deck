@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"log"
+	"net"
 	"net/http"
 	"os"
 	"path"
@@ -12,13 +14,6 @@ import (
 	"time"
 
 	"github.com/labstack/echo"
-)
-
-const (
-	HostnameFile = "/etc/hostname"
-	DHCPFile     = "/etc/dhcpcd.conf"
-
-	Domain = ".byu.edu"
 )
 
 type RouteData struct {
@@ -54,7 +49,7 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 }
 
 var (
-	ErrNotInDNS       = errors.New("hostname not found in DNS (qip)")
+	ErrNotInDNS       = errors.New("hostname not found in DNS")
 	ErrHostnameExists = errors.New("hostname is already on the network")
 	ErrInvalidSubnet  = errors.New("given ip doesn't match current subnet")
 
@@ -64,7 +59,7 @@ var (
 func main() {
 	// check that we are root
 	if os.Getuid() != 0 {
-		fmt.Printf("must be run as root\n")
+		log.Printf("must be run as root")
 		os.Exit(1)
 	}
 
@@ -92,6 +87,9 @@ func main() {
 	// float/second boot stuff (set hn/ip)
 	e.GET("/float", floatHandler)
 
+	// reboot the pi
+	e.GET("/reboot", rebootHandler)
+
 	// update current data every 10 seconds
 	go func() {
 		updateIPs := func() {
@@ -100,7 +98,7 @@ func main() {
 
 			ips, err := getIPs()
 			if err != nil {
-				fmt.Printf("failed to get current ips: %s\n", err)
+				log.Printf("failed to get current ips: %s", err)
 				return
 			}
 
@@ -118,9 +116,19 @@ func main() {
 
 			hn, err := os.Hostname()
 			if err != nil {
-				fmt.Printf("failed to get current hostname: %s\n", err)
+				log.Printf("failed to get current hostname: %s", err)
 				return
 			}
+
+			/*
+				if hn == DefaultHostname {
+					if len(data.DesiredHostname) > 0 {
+						hn = data.DesiredHostname
+					} else {
+						hn = "<Not Set>"
+					}
+				}
+			*/
 
 			data.ActualHostname = hn
 		}
@@ -137,9 +145,20 @@ func main() {
 	}()
 
 	if err := e.Start(":80"); err != nil {
-		fmt.Printf("failed to start server: %s\n", err)
+		log.Printf("failed to start server: %s", err)
 		os.Exit(1)
 	}
+}
+
+func resetData() {
+	data.Lock()
+	defer data.Unlock()
+
+	data.DesiredHostname = ""
+	data.AssignedIP = ""
+	data.Error = nil
+	data.UseDHCP = false
+	data.IgnoreSubnet = false
 }
 
 func serveHTMLHandler(c echo.Context) error {
@@ -148,24 +167,18 @@ func serveHTMLHandler(c echo.Context) error {
 	data.Lock()
 	defer data.Unlock()
 
-	// reset data on start page
-	if pageName == "start" {
-		data.DesiredHostname = ""
-		data.AssignedIP = ""
-		data.Error = nil
-		data.UseDHCP = false
-		data.IgnoreSubnet = false
-	}
-
 	err := c.Render(http.StatusOK, pageName+".html", data)
 	if err != nil {
-		fmt.Printf("error rendering template %s: %v", pageName, err)
+		log.Printf("error rendering template %s: %v", pageName, err)
 	}
 
 	return err
 }
 
 func redirectHandler(c echo.Context) error {
+	// reset data
+	resetData()
+
 	hostname, err := os.Hostname()
 	if err != nil {
 		data.Lock()
@@ -189,19 +202,25 @@ func setHostnameHandler(c echo.Context) error {
 	err := setHostname(data.DesiredHostname, data.IgnoreSubnet, data.UseDHCP)
 	switch {
 	case errors.Is(err, ErrNotInDNS):
-		fmt.Printf("redirecting to 'not in dns' page\n\n")
+		log.Printf("redirecting to 'not in dns' page\n\n")
 		return c.Redirect(http.StatusTemporaryRedirect, "/pages/useDHCP")
 	case errors.Is(err, ErrHostnameExists):
-		fmt.Printf("redirecting to 'hostname already exists' page\n\n")
+		log.Printf("redirecting to 'hostname already exists' page\n\n")
 		return c.Redirect(http.StatusTemporaryRedirect, "/pages/hostnameTaken")
 	case errors.Is(err, ErrInvalidSubnet):
-		fmt.Printf("redirecting to 'invalid subnet' page\n\n")
+		log.Printf("redirecting to 'invalid subnet' page\n\n")
 		return c.Redirect(http.StatusTemporaryRedirect, "/pages/wrongSubnet")
 	case err != nil:
-		data.Error = err
-
-		fmt.Printf("redirecting to 'error' page with error: %s\n\n", data.Error)
-		return c.Redirect(http.StatusTemporaryRedirect, "/pages/error")
+		// check for dns error
+		var dnsError *net.DNSError
+		if errors.As(err, &dnsError) && dnsError.IsNotFound {
+			log.Printf("redirecting to 'not in dns' page\n\n")
+			return c.Redirect(http.StatusTemporaryRedirect, "/pages/useDHCP")
+		} else {
+			data.Error = err
+			log.Printf("redirecting to 'error' page with error: %s\n\n", data.Error)
+			return c.Redirect(http.StatusTemporaryRedirect, "/pages/error")
+		}
 	}
 
 	// if it works, then start the update process
@@ -211,11 +230,11 @@ func setHostnameHandler(c echo.Context) error {
 			data.Error = fmt.Errorf("failed to update and reboot: %s", err)
 			data.Unlock()
 
-			fmt.Printf("failed to update and reboot: %s\n", err)
+			log.Printf("failed to update and reboot: %s", err)
 		}
 	}()
 
-	data.ProgressTitle = "Set Hostname - Updating Pi"
+	data.ProgressTitle = "Please Wait - Updating System"
 	data.ProgressPercent = 0
 
 	// redirect to success page
@@ -276,6 +295,8 @@ func floatHandler(c echo.Context) error {
 		return c.Redirect(http.StatusTemporaryRedirect, "/redirect")
 	}
 
+	resetData()
+
 	// hit the float endpoint
 	err := float()
 	data.Lock()
@@ -284,10 +305,10 @@ func floatHandler(c echo.Context) error {
 	data.Error = err
 
 	switch {
-	case errors.Is(err, ErrFloatFailed):
-		return c.Redirect(http.StatusTemporaryRedirect, "/floatingFailed")
+	case errors.Is(err, ErrDeviceNotFound):
+		return c.Redirect(http.StatusTemporaryRedirect, "/pages/hostnameNotFound")
 	case err != nil:
-		return c.Redirect(http.StatusTemporaryRedirect, "/pages/error")
+		return c.Redirect(http.StatusTemporaryRedirect, "/pages/floatingFailed")
 	}
 
 	go func() {
@@ -297,7 +318,7 @@ func floatHandler(c echo.Context) error {
 			data.Error = fmt.Errorf("failed to do salt deployment: %w", err)
 			data.Unlock()
 
-			fmt.Printf("failed to do salt deployment: %s\n", err)
+			log.Printf("failed to do salt deployment: %s", err)
 		}
 	}()
 
@@ -305,4 +326,20 @@ func floatHandler(c echo.Context) error {
 	data.ProgressPercent = 0
 
 	return c.Redirect(http.StatusTemporaryRedirect, "/pages/progress")
+}
+
+func rebootHandler(c echo.Context) error {
+	data.Lock()
+	defer data.Unlock()
+
+	if err := reboot(); err != nil {
+		data.Error = err
+		return c.Redirect(http.StatusTemporaryRedirect, "/pages/error")
+	}
+
+	data.ProgressPercent = 99
+	data.ProgressTitle = "Rebooting"
+	data.ProgressMessage = "you shouldn't see this page for long"
+
+	return c.String(http.StatusOK, "/pages/progress")
 }

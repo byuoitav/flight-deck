@@ -2,14 +2,19 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net"
 	"time"
 
 	"github.com/sparrc/go-ping"
 )
 
+const (
+	Domain = ".byu.edu"
+)
+
 func setHostname(hn string, ignoreSubnet bool, useDHCP bool) error {
-	fmt.Printf("Setting hostname to %s (ignoreSubnet: %v, useDHCP: %v)\n", hn, ignoreSubnet, useDHCP)
+	log.Printf("Setting hostname to %s (ignoreSubnet: %v, useDHCP: %v)", hn, ignoreSubnet, useDHCP)
 
 	// dns lookup new hostname
 	addrs, err := net.LookupHost(hn + Domain)
@@ -38,7 +43,10 @@ func setHostname(hn string, ignoreSubnet bool, useDHCP bool) error {
 	}
 
 	if !useDHCP {
-		fmt.Printf("Address found for %s%s in DNS: %s\n", hn, Domain, ip.IP.String())
+		log.Printf("Address found for %s%s in DNS: %s", hn, Domain, ip.IP.String())
+
+		// data was locked in parent function
+		data.AssignedIP = ip.IP.String()
 	}
 
 	// try pinging that IP
@@ -52,14 +60,14 @@ func setHostname(hn string, ignoreSubnet bool, useDHCP bool) error {
 		return fmt.Errorf("unable to build pinger: %s", err)
 	}
 
-	fmt.Printf("Pinging %s...\n", pinger.Addr())
+	log.Printf("Pinging %s...", pinger.Addr())
 	pinger.SetPrivileged(true)
 	pinger.Timeout = 5 * time.Second
 	pinger.Count = 3
 	pinger.Run()
 
 	stats := pinger.Statistics()
-	fmt.Printf("Received %v ping responses from %s (total loss: %v%%)\n", stats.PacketsRecv, pinger.Addr(), stats.PacketLoss)
+	log.Printf("Received %v ping responses from %s (total loss: %v%%)", stats.PacketsRecv, pinger.Addr(), stats.PacketLoss)
 
 	if stats.PacketsRecv > 0 {
 		return ErrHostnameExists
@@ -88,27 +96,27 @@ func setHostname(hn string, ignoreSubnet bool, useDHCP bool) error {
 			ip.Mask = net.IPv4Mask(255, 255, 255, 0)
 		}
 
-		fmt.Printf("Using IP: %s\n", ip.String())
+		log.Printf("Using IP: %s", ip.String())
 	} else {
-		fmt.Printf("Using DHCP; Not assigning a static address\n")
+		log.Printf("Using DHCP; Not assigning a static address")
 	}
 
 	// change the hostname
-	fmt.Printf("Writing hostname...")
+	log.Printf("Writing hostname...")
 	if err = changeHostname(hn); err != nil {
-		fmt.Printf("\n")
+		log.Printf("\n")
 		return fmt.Errorf("failed to change hostname: %w", err)
 	}
-	fmt.Printf("done.\n")
+	log.Printf("done.")
 
 	// change the ip
 	if !useDHCP {
-		fmt.Printf("Writing static ip...")
+		log.Printf("Writing static ip...")
 		if err = changeIP(ip); err != nil {
-			fmt.Printf("\n")
+			log.Printf("\n")
 			return fmt.Errorf("failed to change the ip: %w", err)
 		}
-		fmt.Printf("done.\n")
+		log.Printf("done.")
 	}
 
 	return nil

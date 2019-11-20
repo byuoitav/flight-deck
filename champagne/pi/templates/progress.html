@@ -25,6 +25,8 @@
       <br />
       <br />
       <h1>{{.ProgressTitle}}</h1>
+
+      {{if not .Error}}
       <div class="progress" style="margin: 10%">
         <div
           class="progress-bar progress-bar-striped progress-bar-animated"
@@ -37,8 +39,17 @@
       </div>
       <h3>{{.ProgressMessage}}</h3>
       <br />
-
+      {{else}}
+      <h3>error during {{.ProgressMessage}}</h3>
       <h4>{{.Error}}</h4>
+      <button
+        class="btn btn-outline-danger"
+        type="button"
+        onclick="window.location.pathname = '/pages/redirect'"
+      >
+        Start Over
+      </button>
+      {{end}}
     </div>
     {{ template "footer.html" . }}
   </body>

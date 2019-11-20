@@ -16,9 +16,21 @@
 
   <body>
     <div class="container text-center">
-      <div id="hostname-form" >
-        <h1>Please update QIP and assign the host name a static IP address</h1>
+      <div id="hostname-form">
+        <h1>
+          Please use QIP to assign a static IP address for {{.DesiredHostname}}
+        </h1>
       </div>
+
+      <br />
+
+      <button
+        class="btn btn-danger btn-lg"
+        id="restartButton"
+        onclick="window.location.pathname = '/pages/redirect'"
+      >
+        Start Over
+      </button>
     </div>
     {{ template "footer.html" . }}
   </body>
