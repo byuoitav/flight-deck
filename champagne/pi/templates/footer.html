@@ -1,6 +1,15 @@
 <nav class="navbar fixed-bottom bg-light">
         <span>
-			Current Hostname: {{ .ActualHostname }}
+			Current Hostname:
+			{{if ne .ActualHostname "raspberrypi"}}
+				{{ .ActualHostname }}
+			{{else}}
+				{{if not .DesiredHostname}}
+					<Not Set>
+				{{else}}
+					{{.DesiredHostname}}
+				{{end}}
+			{{end}}
         </span>
 
         <span>

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
 	"os/exec"
@@ -22,6 +23,11 @@ const (
 
 var (
 	ErrFloatFailed = errors.New("failed to float")
+
+	FinalProgressMessages = []string{
+		"honestly i'm not sure what it's doing but just give it a minute",
+		"if you're having issues, please call 801-422-KENG",
+	}
 )
 
 func float() error {
@@ -174,18 +180,23 @@ func saltDeployment() error {
 
 	// wait for deployment stuff to finish
 	log.Printf("waiting for deployment to finish (5 minutes).\ncur time: %v", time.Now())
+
+	// get a random final message
+	rand.Seed(time.Now().UnixNano())
+	idx := rand.Intn(len(FinalProgressMessages))
+
 	for i := 0; i < 30; i++ {
 		time.Sleep(7 * time.Second)
 		data.Lock()
 
-		// these are so random, but i want to make salt look like it takes longer :)
+		// these are random, but i want to make salt look like it takes longer :)
 		switch {
 		case i < 8:
 			data.ProgressMessage = "downloading av-control-api"
-		case i >= 8 && i <= 24:
+		case i >= 8 && i <= 22:
 			data.ProgressMessage = "downloading salt config files"
 		default:
-			data.ProgressMessage = "honestly i'm not sure what it's doing but just give it a minute"
+			data.ProgressMessage = FinalProgressMessages[idx]
 		}
 
 		data.ProgressPercent = 35 + 2*i
