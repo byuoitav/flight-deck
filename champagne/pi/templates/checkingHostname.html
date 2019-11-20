@@ -13,14 +13,16 @@
     <script src="/static/js/bootstrap.min.js"></script>
     <script type="text/javascript">
       $(document).ready(function() {
-        hostname = urlParams.get('hostname');
-        window.location.pathname = '/hostname/' + hostname
         $("#btnFetch").click(function() {
           $(this).prop("disabled", true);
           $(this).html(
             `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>Loadingg...`
           );
         });
+
+        var urlParams = new URLSearchParams(window.location.search);
+        hostname = urlParams.get("hostname");
+        window.location.pathname = "/hostname/" + hostname;
       });
     </script>
   </head>
@@ -31,7 +33,7 @@
       <br />
       <br />
       <br />
-      <h3>checking {{.desiredhostname}}”</h3>
+      <h3>Checking {{.DesiredHostname}}”</h3>
       <br />
       <div
         class="spinner-border"
