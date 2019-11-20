@@ -44,6 +44,9 @@ func setHostname(hn string, ignoreSubnet bool, useDHCP bool) error {
 
 	if !useDHCP {
 		log.Printf("Address found for %s%s in DNS: %s", hn, Domain, ip.IP.String())
+
+		// data was locked in parent function
+		data.AssignedIP = ip.IP.String()
 	}
 
 	// try pinging that IP
