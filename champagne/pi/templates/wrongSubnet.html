@@ -20,9 +20,13 @@
     <div class="container">
       <div id="hostname-form">
         <h1>
-          The IP Address of the Pi is not valid for the port it is connected to
+          The IP Address of {{.DesiredHostname}} is not valid for the network
+          port it is currently connected to
         </h1>
-        <h2>The Pi may not work as expected.</h2>
+        <h3>
+          We can update this pi right now, but it will not be able to finish set
+          up until it is plugged into a port with the correct VLAN
+        </h3>
         <ul>
           <li>The switch may not be configured properly</li>
           <li>The pi may be connected to the wrong port</li>
