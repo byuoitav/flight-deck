@@ -48,7 +48,7 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 }
 
 var (
-	ErrNotInDNS       = errors.New("hostname not found in DNS (qip)")
+	ErrNotInDNS       = errors.New("hostname not found in DNS")
 	ErrHostnameExists = errors.New("hostname is already on the network")
 	ErrInvalidSubnet  = errors.New("given ip doesn't match current subnet")
 
@@ -86,6 +86,9 @@ func main() {
 	// float/second boot stuff (set hn/ip)
 	e.GET("/float", floatHandler)
 
+	// reboot the pi
+	e.GET("/reboot", rebootHandler)
+
 	// update current data every 10 seconds
 	go func() {
 		updateIPs := func() {
@@ -115,6 +118,16 @@ func main() {
 				log.Printf("failed to get current hostname: %s", err)
 				return
 			}
+
+			/*
+				if hn == DefaultHostname {
+					if len(data.DesiredHostname) > 0 {
+						hn = data.DesiredHostname
+					} else {
+						hn = "<Not Set>"
+					}
+				}
+			*/
 
 			data.ActualHostname = hn
 		}
@@ -214,7 +227,7 @@ func setHostnameHandler(c echo.Context) error {
 		}
 	}()
 
-	data.ProgressTitle = "Set Hostname - Updating Pi"
+	data.ProgressTitle = "Please Wait - Updating System"
 	data.ProgressPercent = 0
 
 	// redirect to success page
@@ -306,4 +319,20 @@ func floatHandler(c echo.Context) error {
 	data.ProgressPercent = 0
 
 	return c.Redirect(http.StatusTemporaryRedirect, "/pages/progress")
+}
+
+func rebootHandler(c echo.Context) error {
+	data.Lock()
+	defer data.Unlock()
+
+	if err := reboot(); err != nil {
+		data.Error = err
+		return c.Redirect(http.StatusTemporaryRedirect, "/pages/error")
+	}
+
+	data.ProgressPercent = 99
+	data.ProgressTitle = "Rebooting"
+	data.ProgressMessage = "you shouldn't see this page for long"
+
+	return c.String(http.StatusOK, "/pages/progress")
 }

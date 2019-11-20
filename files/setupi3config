@@ -169,4 +169,4 @@ bar {
         status_command i3status
 }
 
-exec chromium-browser --kiosk --incognito --no-sandbox http://localhost/pages/redirect
+exec chromium-browser --kiosk --incognito --no-sandbox --disable-pinch --overscorll-history-navigation=0 http://localhost/pages/redirect

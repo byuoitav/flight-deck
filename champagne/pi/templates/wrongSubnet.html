@@ -12,14 +12,7 @@
     <script src="/static/js/popper.min.js"></script>
     <script src="/static/js/bootstrap.min.js"></script>
     <script type="text/javascript">
-      $(document).ready(function() {
-        $.ajax({
-          url: "",
-          type: "GET",
-
-          success: function(data) {}
-        });
-      });
+      $(document).ready(function() {});
     </script>
   </head>
 
@@ -27,8 +20,7 @@
     <div class="container">
       <div id="hostname-form">
         <h1>
-          The IP Address of the Pi is not valid for the port it is
-          connected to
+          The IP Address of the Pi is not valid for the port it is connected to
         </h1>
         <h2>The Pi may not work as expected.</h2>
         <ul>
@@ -52,7 +44,7 @@
             id="restartButton"
             onclick="window.location.pathname = '/pages/redirect'"
           >
-            Restart
+            Start Over
           </button>
         </div>
       </div>

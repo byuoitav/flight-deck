@@ -16,7 +16,7 @@
         $("#btnFetch").click(function() {
           $(this).prop("disabled", true);
           $(this).html(
-            `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>Loadingg...`
+            `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>Loading...`
           );
         });
         window.location.pathname = "/redirect";
@@ -35,8 +35,7 @@
         class="spinner-border"
         role="status"
         style="width: 10rem; height: 10rem;"
-      >
-      </div>
+      ></div>
     </div>
     {{ template "footer.html" . }}
   </body>
