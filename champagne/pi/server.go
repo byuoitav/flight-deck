@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"io"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"path"
@@ -210,10 +211,16 @@ func setHostnameHandler(c echo.Context) error {
 		log.Printf("redirecting to 'invalid subnet' page\n\n")
 		return c.Redirect(http.StatusTemporaryRedirect, "/pages/wrongSubnet")
 	case err != nil:
-		data.Error = err
-
-		log.Printf("redirecting to 'error' page with error: %s\n\n", data.Error)
-		return c.Redirect(http.StatusTemporaryRedirect, "/pages/error")
+		// check for dns error
+		var dnsError *net.DNSError
+		if errors.As(err, &dnsError) && dnsError.IsNotFound {
+			log.Printf("redirecting to 'not in dns' page\n\n")
+			return c.Redirect(http.StatusTemporaryRedirect, "/pages/useDHCP")
+		} else {
+			data.Error = err
+			log.Printf("redirecting to 'error' page with error: %s\n\n", data.Error)
+			return c.Redirect(http.StatusTemporaryRedirect, "/pages/error")
+		}
 	}
 
 	// if it works, then start the update process
@@ -298,10 +305,10 @@ func floatHandler(c echo.Context) error {
 	data.Error = err
 
 	switch {
-	case errors.Is(err, ErrFloatFailed):
-		return c.Redirect(http.StatusTemporaryRedirect, "/pages/floatingFailed")
+	case errors.Is(err, ErrDeviceNotFound):
+		return c.Redirect(http.StatusTemporaryRedirect, "/pages/hostnameNotFound")
 	case err != nil:
-		return c.Redirect(http.StatusTemporaryRedirect, "/pages/error")
+		return c.Redirect(http.StatusTemporaryRedirect, "/pages/floatingFailed")
 	}
 
 	go func() {

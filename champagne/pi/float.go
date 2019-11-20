@@ -22,7 +22,7 @@ const (
 )
 
 var (
-	ErrFloatFailed = errors.New("failed to float")
+	ErrDeviceNotFound = errors.New("device not found in production or stage")
 
 	FinalProgressMessages = []string{
 		"honestly i'm not sure what it's doing but just give it a minute",
@@ -35,23 +35,23 @@ func float() error {
 
 	req, err := http.NewRequestWithContext(context.TODO(), http.MethodPost, FloatURL, nil)
 	if err != nil {
-		return fmt.Errorf("%w: %s", ErrFloatFailed, err)
+		return fmt.Errorf("failed to float: %w", err)
 	}
 
 	log.Printf("Making GET request to %s", FloatURL)
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return fmt.Errorf("%w: %s", ErrFloatFailed, err)
+		return fmt.Errorf("failed to float: %w", err)
 	}
 	defer resp.Body.Close()
 
 	buf, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("%w: %s", ErrFloatFailed, err)
+		return fmt.Errorf("failed to float: %w", err)
 	}
 
-	log.Printf("Response:\n%s", buf)
+	log.Printf("Response %d:\n%s", resp.StatusCode, buf)
 
 	switch resp.StatusCode {
 	case http.StatusOK:
@@ -73,13 +73,13 @@ func float() error {
 
 		return source(EnvironmentFile)
 	case http.StatusForbidden:
-		return fmt.Errorf("%w: %s", ErrFloatFailed, buf)
+		return fmt.Errorf("failed to float: %w", ErrDeviceNotFound)
 	case http.StatusNotFound:
-		return fmt.Errorf("%w: %s", ErrFloatFailed, buf)
+		return fmt.Errorf("failed to float: %s", buf)
 	case http.StatusInternalServerError:
-		return fmt.Errorf("%w: unkown error: %s", ErrFloatFailed, buf)
+		return fmt.Errorf("failed to float: unkown error: %s", buf)
 	default:
-		return fmt.Errorf("%w: unkown status code %d: %s", ErrFloatFailed, resp.StatusCode, buf)
+		return fmt.Errorf("failed to float: unkown status code %d: %s", resp.StatusCode, buf)
 	}
 }
 
