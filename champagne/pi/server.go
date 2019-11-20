@@ -272,7 +272,7 @@ func allowDHCPHandler(c echo.Context) error {
 		data.UseDHCP = true
 		data.Unlock()
 
-		return setHostnameHandler(c)
+		return c.Redirect(http.StatusTemporaryRedirect, "/pages/checkingHostname")
 	}
 
 	return c.Redirect(http.StatusTemporaryRedirect, "/pages/start")
@@ -284,7 +284,7 @@ func ignoreSubnetHandler(c echo.Context) error {
 		data.IgnoreSubnet = true
 		data.Unlock()
 
-		return setHostnameHandler(c)
+		return c.Redirect(http.StatusTemporaryRedirect, "/pages/checkingHostname")
 	}
 
 	return c.Redirect(http.StatusTemporaryRedirect, "/pages/start")

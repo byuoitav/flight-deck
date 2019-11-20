@@ -40,8 +40,8 @@
           <ul>
             <li>IP in DNS for {{.DesiredHostname}}: {{.AssignedIP}}</li>
             <li>
-              Current IP(s) of device: {{range _, $value := .IPs }} {{ $value }}
-              {{end}}
+              Current IP(s) of device: {{range $key, $value := .IPs }}
+              {{$value}} {{end}}
             </li>
           </ul>
         </ul>

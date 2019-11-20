@@ -27,6 +27,7 @@ var (
 	FinalProgressMessages = []string{
 		"honestly i'm not sure what it's doing but just give it a minute",
 		"if you're having issues, please call 801-422-KENG",
+		"dirty mike is finding the boys...",
 	}
 )
 
