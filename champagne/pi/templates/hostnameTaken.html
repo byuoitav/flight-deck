@@ -16,10 +16,13 @@
     <body>
         <div class="container">                
             <div id="hostname-form">
-                <h1>The host name you entered is already taken.</h1>
+				<h1>The assigned IP for {{.DesiredHostname}} you entered is already taken.</h1>
+				<br />
+
+				<h3>Troubleshooting</h3>
                 <ul>
-                    <li>Please restart and verify that the host name was inputed correctly</li>
-                    <li>Please check QIP and reslove the issue</li>
+					<li>The asssigned IP is {{.AssignedIP}}</li>
+                    <li>Please verify that the hostname was input correctly</li>
                 </ul>
                 <div class="text-center">
                     <button class="btn btn-lg btn-danger"

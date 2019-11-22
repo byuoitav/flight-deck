@@ -203,7 +203,8 @@ func setHostnameHandler(c echo.Context) error {
 	switch {
 	case errors.Is(err, ErrNotInDNS):
 		log.Printf("redirecting to 'not in dns' page\n\n")
-		return c.Redirect(http.StatusTemporaryRedirect, "/pages/useDHCP")
+		// return c.Redirect(http.StatusTemporaryRedirect, "/pages/useDHCP")
+		return c.Redirect(http.StatusTemporaryRedirect, "/pages/updateQIP")
 	case errors.Is(err, ErrHostnameExists):
 		log.Printf("redirecting to 'hostname already exists' page\n\n")
 		return c.Redirect(http.StatusTemporaryRedirect, "/pages/hostnameTaken")
@@ -322,7 +323,7 @@ func floatHandler(c echo.Context) error {
 		}
 	}()
 
-	data.ProgressTitle = "I'm Floating!"
+	data.ProgressTitle = "Downloading Code..."
 	data.ProgressPercent = 0
 
 	return c.Redirect(http.StatusTemporaryRedirect, "/pages/progress")
