@@ -21,14 +21,17 @@
       <br />
       <br />
       <h1>Uh-Oh!</h1>
-      <h3>No matching host name was found while attempting to float</h3>
+      <h3>
+        The provisioning server was unable to find a hostname that matched this
+        devices IP address.
+      </h3>
       <br />
       <button
         class="btn btn-outline-danger btn-lg"
         type="button"
         onClick="window.location.pathname = '/pages/floating'"
       >
-        Re-Float
+        Try Again
       </button>
     </div>
     {{ template "footer.html" . }}
