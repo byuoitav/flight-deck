@@ -56,7 +56,7 @@ func setHostname(hn string, ignoreSubnet bool, useDHCP bool) error {
 	var pinger *ping.Pinger
 	var err error
 
-	if ip.IP != nil {
+	if ip.IP.IsUnspecified() {
 		pinger, err = ping.NewPinger(ip.IP.String())
 	} else {
 		pinger, err = ping.NewPinger(hn + Domain)
