@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net"
@@ -15,34 +16,36 @@ const (
 
 func setHostname(hn string, ignoreSubnet bool, useDHCP bool) error {
 	log.Printf("Setting hostname to %s (ignoreSubnet: %v, useDHCP: %v)", hn, ignoreSubnet, useDHCP)
-
-	// dns lookup new hostname
-	addrs, err := net.LookupHost(hn + Domain)
-	if err != nil {
-		return fmt.Errorf("unable to lookup host: %w", err)
-	}
-
-	switch {
-	case !useDHCP && len(addrs) == 0:
-		return ErrNotInDNS
-	}
-
-	// find the best IP to use
 	ip := &net.IPNet{}
 
-	for _, addr := range addrs {
-		i := net.ParseIP(addr)
-		if i != nil && !i.IsLoopback() && i.To4() != nil {
-			ip.IP = i
-			break
-		}
-	}
-
-	if ip.IP == nil && !useDHCP {
-		return ErrNotInDNS // even though it is, there must not be an ipv4 address for it
-	}
-
 	if !useDHCP {
+		// dns lookup new hostname
+		var dnsError *net.DNSError
+
+		addrs, err := net.LookupHost(hn + Domain)
+		switch {
+		case errors.As(err, &dnsError) && dnsError.IsNotFound:
+			return ErrNotInDNS
+		case err != nil:
+			return fmt.Errorf("unable to lookup host: %w", err)
+		case len(addrs) == 0:
+			return ErrNotInDNS
+		}
+
+		// find the best IP to use
+
+		for _, addr := range addrs {
+			i := net.ParseIP(addr)
+			if i != nil && !i.IsLoopback() && i.To4() != nil {
+				ip.IP = i
+				break
+			}
+		}
+
+		if ip.IP == nil {
+			return ErrNotInDNS // even though it is, there must not be an ipv4 address for it
+		}
+
 		log.Printf("Address found for %s%s in DNS: %s", hn, Domain, ip.IP.String())
 
 		// data was locked in parent function
@@ -51,11 +54,14 @@ func setHostname(hn string, ignoreSubnet bool, useDHCP bool) error {
 
 	// try pinging that IP
 	var pinger *ping.Pinger
+	var err error
+
 	if ip.IP != nil {
 		pinger, err = ping.NewPinger(ip.IP.String())
 	} else {
 		pinger, err = ping.NewPinger(hn + Domain)
 	}
+
 	if err != nil {
 		return fmt.Errorf("unable to build pinger: %s", err)
 	}

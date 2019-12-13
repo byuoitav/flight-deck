@@ -214,19 +214,6 @@ func setHostnameHandler(c echo.Context) error {
 		data.Error = err
 		log.Printf("redirecting to 'error' page with error: %s\n\n", data.Error)
 		return c.Redirect(http.StatusTemporaryRedirect, "/pages/error")
-
-		/*
-			// check for dns error
-			var dnsError *net.DNSError
-			if errors.As(err, &dnsError) && dnsError.IsNotFound {
-				log.Printf("redirecting to 'not in dns' page\n\n")
-				return c.Redirect(http.StatusTemporaryRedirect, "/pages/useDHCP")
-			} else {
-				data.Error = err
-				log.Printf("redirecting to 'error' page with error: %s\n\n", data.Error)
-				return c.Redirect(http.StatusTemporaryRedirect, "/pages/error")
-			}
-		*/
 	}
 
 	// if it works, then start the update process
