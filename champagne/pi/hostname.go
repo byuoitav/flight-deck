@@ -22,7 +22,7 @@ func setHostname(hn string, ignoreSubnet bool, useDHCP bool) error {
 
 	pinger, err := ping.NewPinger(hn + Domain)
 	switch {
-	case errors.As(err, dnsError) && dnsError.IsNotFound:
+	case errors.As(err, &dnsError) && dnsError.IsNotFound:
 		if !useDHCP {
 			return ErrNotInDNS
 		}
