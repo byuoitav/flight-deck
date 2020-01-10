@@ -278,6 +278,20 @@ func Deploy(address string, output io.Writer, servicesToDeploy []string, files .
 		fmt.Fprintf(stdin, `source /etc/environment`+"\n")
 
 		// docker stuff
+		dockerGitUser := os.Getenv("DOCKER_GITHUB_USERNAME")
+		dockerGitPass := os.Getenv("DOCKER_GITHUB_PASSWORD")
+		dockerGit := true
+		if len(dockerGitUser) == 0 {
+			log.L.Infof("ENVVAR DOCKER_GITHUB_USERNAME is empty")
+			dockerGit = false
+		}
+		if len(dockerGitPass) == 0 {
+			log.L.Infof("ENVVAR DOCKER_GITHUB_PASSWORD is empty")
+			dockerGit = false
+		}
+		if dockerGit {
+			fmt.Fprintf(stdin, `docker login docker.pkg.github.com -u %s -p %s`+"\n", dockerGitUser, dockerGitPass)
+		}
 		fmt.Fprintf(stdin, `docker-compose -f %s pull`+"\n", dockerComposeFile)
 		fmt.Fprintf(stdin, `docker stop $(docker ps -aq)`+"\n")
 		fmt.Fprintf(stdin, `docker rm $(docker ps -aq)`+"\n")
