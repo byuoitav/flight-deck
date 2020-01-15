@@ -91,7 +91,7 @@ func DeployByHostname(hostname string) (DeployReport, *nerr.E) {
 	log.L.Infof("Starting DeployByHostname to %v", hostname)
 
 	// get room from database
-	room, err := db.GetDB().GetRoom(hostname[:strings.LastIndex(hostname, "-")])
+	/*room, err := db.GetDB().GetRoom(hostname[:strings.LastIndex(hostname, "-")])
 	if err != nil {
 		return report, nerr.Translate(err).Addf("failed to get room for hostname %v", hostname)
 	}
@@ -107,6 +107,11 @@ func DeployByHostname(hostname string) (DeployReport, *nerr.E) {
 			break
 		}
 	}
+	*/
+	device, err := db.GetDB().GetDevice(hostname)
+	if err != nil {
+		return report, nerr.Translate(err).Addf("failed to get device for hostname %v", hostname)
+	}
 
 	// if the device wasn't found
 	if len(device.Type.ID) == 0 {
@@ -114,6 +119,15 @@ func DeployByHostname(hostname string) (DeployReport, *nerr.E) {
 	}
 
 	log.L.Debugf("Got device %v", device.ID)
+	log.L.Debugf("Getting room for designation")
+
+	// get room from database
+	room, err := db.GetDB().GetRoom(hostname[:strings.LastIndex(hostname, "-")])
+	if err != nil {
+		return report, nerr.Translate(err).Addf("failed to get room for hostname %v", hostname)
+	}
+
+	log.L.Debugf("Got room %v", room.ID)
 
 	report, er := DeployToDevice(device, room.Designation)
 	if er != nil {
@@ -123,7 +137,7 @@ func DeployByHostname(hostname string) (DeployReport, *nerr.E) {
 	return report, nil
 }
 
-// DeployToDevice takes a slice of devices and gets all the data it needs to deploy
+// DeployToDevice takes a device and gets all the data it needs to deploy
 func DeployToDevice(device structs.Device, designation string) (DeployReport, *nerr.E) {
 	var report DeployReport
 	var toScp []file
