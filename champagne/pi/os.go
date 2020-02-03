@@ -13,7 +13,7 @@ import (
 )
 
 func fixTime() error {
-	log.Printf("Fixing time")
+	log.Printf("Fixing time (current time: %s)", time.Now())
 
 	cmd := exec.Command("ntpdate", "tick.byu.edu")
 	cmd.Stdout = os.Stdout
@@ -21,6 +21,10 @@ func fixTime() error {
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("unable to fix time: %s", err)
 	}
+
+	time.Sleep(5 * time.Second)
+
+	log.Printf("Time after fix: %s\n", time.Now())
 
 	return nil
 }
@@ -31,6 +35,11 @@ func updateAndReboot() error {
 	data.ProgressPercent = 5
 	data.Unlock()
 
+	if err := fixTime(); err != nil {
+		return err
+	}
+
+	// let's try doing it twice?
 	if err := fixTime(); err != nil {
 		return err
 	}
