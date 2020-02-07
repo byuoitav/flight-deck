@@ -290,11 +290,6 @@ func floatHandler(c echo.Context) error {
 
 	resetData()
 
-	// fix the time
-	if err := fixTime(); err != nil {
-		return c.Redirect(http.StatusTemporaryRedirect, "/redirect")
-	}
-
 	// hit the float endpoint
 	err := float()
 	data.Lock()
