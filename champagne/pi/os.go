@@ -39,11 +39,6 @@ func updateAndReboot() error {
 		return err
 	}
 
-	// let's try doing it twice?
-	if err := fixTime(); err != nil {
-		return err
-	}
-
 	data.Lock()
 	data.ProgressMessage = "updating apt"
 	data.ProgressPercent = 15
