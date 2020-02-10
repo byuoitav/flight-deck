@@ -22,17 +22,9 @@ func fixTime() error {
 		return fmt.Errorf("unable to fix time: %s", err)
 	}
 
-	time.Sleep(3 * time.Second)
+	time.Sleep(5 * time.Second)
+
 	log.Printf("Time after fix: %s\n", time.Now())
-
-	cmd = exec.Command("hwclock", "--systohc")
-	cmd.Stdout = os.Stdout
-	cmd.Stdin = os.Stdin
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("unable to persist time fix: %s", err)
-	}
-
-	log.Printf("Time successfully persisted to hardware clock\n")
 
 	return nil
 }
