@@ -5,6 +5,7 @@ go 1.13
 require (
 	github.com/aws/aws-sdk-go v1.28.0
 	github.com/byuoitav/authmiddleware v1.1.2
+	github.com/byuoitav/central-event-system v0.0.0-20200115195636-0c9fbced1b99 // indirect
 	github.com/byuoitav/common v0.0.0-20191210190714-e9b411b3cc0d
 	github.com/byuoitav/event-translator-microservice v0.0.0-20181026200649-3c2b7d913ca7
 	github.com/deckarep/golang-set v1.7.1
