@@ -8,12 +8,15 @@ github.com/byuoitav/authmiddleware v1.1.1 h1:j+CeTv4qyCgAH1SkICOnAWpDQ47kUWEpJam
 github.com/byuoitav/authmiddleware v1.1.1/go.mod h1:jKF86ft9J9+8ZcaxX64UAjoCiag8XdS8sk8xrIOXL1U=
 github.com/byuoitav/authmiddleware v1.1.2 h1:aFvY/HUGmSMkLxWuwHvE94iUG/rS3PW0Z/Zh1lDTG2E=
 github.com/byuoitav/authmiddleware v1.1.2/go.mod h1:jKF86ft9J9+8ZcaxX64UAjoCiag8XdS8sk8xrIOXL1U=
+github.com/byuoitav/central-event-system v0.0.0-20200115195636-0c9fbced1b99 h1:nIZ9EHlj1hmz3hV1A+Yq0x0ec3cpPRKESVhT4n+LiRw=
+github.com/byuoitav/central-event-system v0.0.0-20200115195636-0c9fbced1b99/go.mod h1:+KCvx75wISCCkCrgIWRdlJxRXlA2yxQvR4HHgU/TdpU=
 github.com/byuoitav/common v0.0.0-20191031153011-56b526594c6b h1:sT6jgY7MkaWMKLTyLAl3WbVcsZEu8cvOktKqIRDgzkY=
 github.com/byuoitav/common v0.0.0-20191031153011-56b526594c6b/go.mod h1:YTDTFEmez7HU3oyCIWjU3RfQ/P6v24LEzH5YUebph7I=
 github.com/byuoitav/common v0.0.0-20191210190714-e9b411b3cc0d h1:F3/vBL2hw+zjCm78sWss6eCozj5IopBzN2bIHvKj2hw=
 github.com/byuoitav/common v0.0.0-20191210190714-e9b411b3cc0d/go.mod h1:YTDTFEmez7HU3oyCIWjU3RfQ/P6v24LEzH5YUebph7I=
 github.com/byuoitav/event-translator-microservice v0.0.0-20181026200649-3c2b7d913ca7 h1:ahsRw0NDfuDOH3pZ6bg16l5JtbQuVW46TJNQAqVp/OQ=
 github.com/byuoitav/event-translator-microservice v0.0.0-20181026200649-3c2b7d913ca7/go.mod h1:FPRjd26euV55hbQJTkc4kk7RlFouKcEo4O6IXnTXYLY=
+github.com/byuoitav/ui v0.3.0 h1:UDRQAyHQzigSJe/b+pX2ys6B6W8+cE0BQJo9Ldk/OUI=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
@@ -59,6 +62,7 @@ github.com/mavricknz/asn1-ber v0.0.0-20151103223136-b9df1c2f4213 h1:3DongGRjJZvI
 github.com/mavricknz/asn1-ber v0.0.0-20151103223136-b9df1c2f4213/go.mod h1:v/ZufymxjcI3pnNmQIUQQKxnHLTblrjZ4MNLs5DrZ1o=
 github.com/mavricknz/ldap v0.0.0-20160227184754-f5a958005e43 h1:x4SDcUPDTMzuFEdWe5lTznj1echpsd0ApTkZOdwtm7g=
 github.com/mavricknz/ldap v0.0.0-20160227184754-f5a958005e43/go.mod h1:z76yvVwVulPd8FyifHe8UEHeud6XXaSan0ibi2sDy6w=
+github.com/pkg/errors v0.8.1 h1:iURUrRGxPUNPdy5/HRSm+Yj6okJ6UtLINN0Q9M4+h3I=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
