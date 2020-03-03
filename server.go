@@ -14,6 +14,10 @@ func main() {
 	port := ":8008"
 	router := common.NewRouter()
 
+	router.GET("/healthz", func(c echo.Context) error {
+		return c.String(http.StatusOK, "Ready for takeoff!")
+	})
+
 	secure := router.Group("", echo.WrapMiddleware(authmiddleware.Authenticate))
 
 	/* secure routes */

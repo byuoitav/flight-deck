@@ -42,9 +42,11 @@ type DeployReport struct {
 
 func init() {
 	// get ssh key
-	bucket := s3.New(session.New(), &aws.Config{
+	log.L.Infof("Attempting to get AWS Session...")
+	sess := session.Must(session.NewSession(&aws.Config{
 		Region: aws.String(os.Getenv("AWS_BUCKET_REGION")),
-	})
+	}))
+	bucket := s3.New(sess)
 
 	resp, err := bucket.GetObject(&s3.GetObjectInput{
 		Bucket: aws.String(os.Getenv("RASPI_DEPLOYMENT_S3_BUCKET")),

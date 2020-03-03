@@ -58,11 +58,6 @@ func (s *Server) handleFloat(c echo.Context) error {
 		// If not found in prd then try stg
 		log.L.Debugf("Device %s not found in prd, trying stg", name)
 		err = s.floatDevice(name, "stg")
-		if err != nil && errors.Is(err, errDeviceNotFound) {
-			// If not found in stg then try dev
-			log.L.Debugf("Device %s not found in stg, trying dev", name)
-			err = s.floatDevice(name, "dev")
-		}
 	}
 
 	// If there is still an error (still not found or other error)
@@ -118,7 +113,7 @@ func (s *Server) floatDevice(name, env string) error {
 		}
 
 		// If the device isn't in flight-deck's database then return errDeviceNotFound
-		if strings.Contains(string(body), "failed to find device") {
+		if strings.Contains(string(body), "failed to get device") {
 			return errDeviceNotFound
 		}
 
