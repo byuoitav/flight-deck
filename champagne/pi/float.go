@@ -11,14 +11,19 @@ import (
 	"os"
 	"os/exec"
 	"time"
+
+	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/client"
+	"gopkg.in/yaml.v2"
 )
 
 const (
-	FloatURL         = "http://sandbag.byu.edu:2001/float"
-	EnvironmentFile  = "/etc/environment"
-	DeploymentFile   = "/tmp/deployment.log"
-	SaltMinionFile   = "/etc/salt/minion"
-	SaltMinionIDFile = "/etc/salt/minion_id"
+	FloatURL          = "http://sandbag.byu.edu:2001/float"
+	EnvironmentFile   = "/etc/environment"
+	DeploymentFile    = "/tmp/deployment.log"
+	SaltMinionFile    = "/etc/salt/minion"
+	SaltMinionIDFile  = "/etc/salt/minion_id"
+	DockerComposeFile = "/tmp/docker-compose.yml"
 )
 
 var (
@@ -30,6 +35,27 @@ var (
 		"dirty mike is finding the boys...",
 	}
 )
+
+type dcompose struct {
+	Services map[string]ms `yaml:"services,omitempty"`
+}
+
+type ms struct {
+	Ports       []string           `yaml:"ports,omitempty"`
+	Command     string             `yaml:"command,omitempty"`
+	Environment []string           `yaml:"environment,omitempty"`
+	NetworkMode string             `yaml:"network_mode,omitempty"`
+	Restart     string             `yaml:"restart,omitempty"`
+	TTY         string             `yaml:"tty,omitempty"`
+	Logging     map[string]options `yaml:"logging,omitempty"`
+	Image       string             `yaml:"image,omitempty"`
+}
+
+type options struct {
+	MaxSize       string `yaml:"max-size,omitempty"`
+	Mode          string `yaml:"mode,omitempty"`
+	MaxBufferSize string `yaml:"max-buffer-size,omitempty"`
+}
 
 func float() error {
 	log.Printf("Floating...")
@@ -182,27 +208,85 @@ func saltDeployment() error {
 	// wait for deployment stuff to finish
 	log.Printf("waiting for deployment to finish (5 minutes).\ncur time: %v", time.Now())
 
+	if err := waitForFile(context.TODO(), DockerComposeFile, true); err != nil {
+		return fmt.Errorf("docker compose file never showed up: %s", err)
+	}
+
+	dockerCompose, err := ioutil.ReadFile(DockerComposeFile)
+	if err != nil {
+		return fmt.Errorf("unable to read docker compose file: %s", err)
+	}
+
+	var dockers dcompose
+
+	if err = yaml.Unmarshal(dockerCompose, &dockers); err != nil {
+		return fmt.Errorf("unable to unmarshal docker-compose.yml: %s", err)
+	}
+
+	dockerNum := 0
+
+	//this is the number of dockers that should be running
+	for range dockers.Services {
+		dockerNum++
+	}
+
+	cli, err := client.NewEnvClient()
+	// cli, err := client.NewClientWithOpts(client.FromEnv)
+	if err != nil {
+		return fmt.Errorf("unable to get docker client: %s", err)
+	}
+
+	runningDockers, err := cli.ContainerList(context.TODO(), types.ContainerListOptions{})
+	if err != nil {
+		return fmt.Errorf("uanble to get list of running docker containers: %s", err)
+	}
+
 	// get a random final message
 	rand.Seed(time.Now().UnixNano())
 	idx := rand.Intn(len(FinalProgressMessages))
 
-	for i := 0; i < 30; i++ {
+	timeout := 600
+	done := false
+
+	for {
 		time.Sleep(7 * time.Second)
+		timeout += 7
 		data.Lock()
 
-		// these are random, but i want to make salt look like it takes longer :)
 		switch {
-		case i < 8:
-			data.ProgressMessage = "downloading av-control-api"
-		case i >= 8 && i <= 22:
-			data.ProgressMessage = "downloading salt config files"
+		case len(runningDockers) < dockerNum:
+			data.ProgressMessage = fmt.Sprintf("downloaded %d/%d applications", len(runningDockers), dockerNum)
+		case len(runningDockers) == dockerNum:
+			done = true
+			break
 		default:
 			data.ProgressMessage = FinalProgressMessages[idx]
 		}
 
-		data.ProgressPercent = 35 + 2*i
+		data.ProgressPercent = int(100 * float32(len(runningDockers)) / float32(dockerNum))
 		data.Unlock()
+		if done {
+			break
+		}
 	}
+
+	// for i := 0; i < 30; i++ {
+	// 	time.Sleep(7 * time.Second)
+	// 	data.Lock()
+
+	// 	// these are random, but i want to make salt look like it takes longer :)
+	// 	switch {
+	// 	case i < 8:
+	// 		data.ProgressMessage = "downloading av-control-api"
+	// 	case i >= 8 && i <= 22:
+	// 		data.ProgressMessage = "downloading salt config files"
+	// 	default:
+	// 		data.ProgressMessage = FinalProgressMessages[idx]
+	// 	}
+
+	// 	data.ProgressPercent = 35 + 2*i
+	// 	data.Unlock()
+	// }
 
 	// schedule a reboot (will shutdown in 1 minute)
 	cmd = exec.Command("shutdown", "-r")
