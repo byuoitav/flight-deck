@@ -223,22 +223,9 @@ func saltDeployment() error {
 		return fmt.Errorf("unable to unmarshal docker-compose.yml: %s", err)
 	}
 
-	dockerNum := 0
-
-	//this is the number of dockers that should be running
-	for range dockers.Services {
-		dockerNum++
-	}
-
-	cli, err := client.NewEnvClient()
-	// cli, err := client.NewClientWithOpts(client.FromEnv)
+	cli, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
 		return fmt.Errorf("unable to get docker client: %s", err)
-	}
-
-	runningDockers, err := cli.ContainerList(context.TODO(), types.ContainerListOptions{})
-	if err != nil {
-		return fmt.Errorf("uanble to get list of running docker containers: %s", err)
 	}
 
 	// get a random final message
@@ -253,40 +240,27 @@ func saltDeployment() error {
 		timeout += 7
 		data.Lock()
 
+		runningDockers, err := cli.ContainerList(context.TODO(), types.ContainerListOptions{})
+		if err != nil {
+			return fmt.Errorf("unable to get list of running docker containers: %s", err)
+		}
+
 		switch {
-		case len(runningDockers) < dockerNum:
-			data.ProgressMessage = fmt.Sprintf("downloaded %d/%d applications", len(runningDockers), dockerNum)
-		case len(runningDockers) == dockerNum:
+		case len(runningDockers) < len(dockers.Services):
+			data.ProgressMessage = fmt.Sprintf("downloaded %d/%d applications", len(runningDockers), len(dockers.Services))
+		case len(runningDockers) == len(dockers.Services):
 			done = true
 			break
 		default:
 			data.ProgressMessage = FinalProgressMessages[idx]
 		}
 
-		data.ProgressPercent = int(100 * float32(len(runningDockers)) / float32(dockerNum))
+		data.ProgressPercent = int(100 * float32(len(runningDockers)) / float32(len(dockers.Services)))
 		data.Unlock()
 		if done {
 			break
 		}
 	}
-
-	// for i := 0; i < 30; i++ {
-	// 	time.Sleep(7 * time.Second)
-	// 	data.Lock()
-
-	// 	// these are random, but i want to make salt look like it takes longer :)
-	// 	switch {
-	// 	case i < 8:
-	// 		data.ProgressMessage = "downloading av-control-api"
-	// 	case i >= 8 && i <= 22:
-	// 		data.ProgressMessage = "downloading salt config files"
-	// 	default:
-	// 		data.ProgressMessage = FinalProgressMessages[idx]
-	// 	}
-
-	// 	data.ProgressPercent = 35 + 2*i
-	// 	data.Unlock()
-	// }
 
 	// schedule a reboot (will shutdown in 1 minute)
 	cmd = exec.Command("shutdown", "-r")
