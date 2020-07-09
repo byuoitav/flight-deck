@@ -51,15 +51,19 @@ func updateAndReboot() error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("failed to run %q: %w", "apt update", err)
+		// for now, we are just going to ignore errors here
+		data.Lock()
+		data.ProgressPercent = 40
+		data.ProgressMessage = fmt.Sprintf("upgrading packages, but there was an error updating apt: %s", err)
+		data.Unlock()
+	} else {
+		data.Lock()
+		data.ProgressPercent = 30
+		data.ProgressMessage = "upgrading packages"
+		data.Unlock()
 	}
 
 	log.Printf("\nUpgrading packages")
-
-	data.Lock()
-	data.ProgressPercent = 30
-	data.ProgressMessage = "upgrading packages"
-	data.Unlock()
 
 	// upgrade packages
 	cmd = exec.Command("apt", "-y", "upgrade")
