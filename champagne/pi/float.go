@@ -223,7 +223,7 @@ func saltDeployment() error {
 		return fmt.Errorf("unable to unmarshal docker-compose.yml: %s", err)
 	}
 
-	cli, err := client.NewClientWithOpts(client.FromEnv)
+	cli, err := client.NewEnvClient()
 	if err != nil {
 		return fmt.Errorf("unable to get docker client: %s", err)
 	}
