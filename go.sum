@@ -4,6 +4,8 @@ github.com/aws/aws-sdk-go v1.25.34 h1:roL040qe1npx1ToFeXYHOGp/nOpLbcIQHKZ5UeDIyI
 github.com/aws/aws-sdk-go v1.25.34/go.mod h1:KmX6BPdI08NWTb3/sm4ZGu5ShLoqVDhKgpiN924inxo=
 github.com/aws/aws-sdk-go v1.28.0 h1:NkmnHFVEMTRYTleRLm5xUaL1mHKKkYQl4rCd+jzD58c=
 github.com/aws/aws-sdk-go v1.28.0/go.mod h1:KmX6BPdI08NWTb3/sm4ZGu5ShLoqVDhKgpiN924inxo=
+github.com/byuoitav/auth v0.3.1 h1:aMsdhZYy2tjOgGo0tn6YDEb3RvMMT/0oymewFrdr4c8=
+github.com/byuoitav/auth v0.3.1/go.mod h1:pbb0bFvLfcV6JcQA1zJd61QQRvmpyAfQbrnjtUJX4s8=
 github.com/byuoitav/authmiddleware v1.1.1 h1:j+CeTv4qyCgAH1SkICOnAWpDQ47kUWEpJamTxVczP7U=
 github.com/byuoitav/authmiddleware v1.1.1/go.mod h1:jKF86ft9J9+8ZcaxX64UAjoCiag8XdS8sk8xrIOXL1U=
 github.com/byuoitav/authmiddleware v1.1.2 h1:aFvY/HUGmSMkLxWuwHvE94iUG/rS3PW0Z/Zh1lDTG2E=
@@ -33,6 +35,7 @@ github.com/go-cas/cas v2.1.0+incompatible/go.mod h1:ydhR3b47tx6O1xtBSEVBMBg3n0Ot
 github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b h1:VKtxabqXZkF25pY9ekfRL6a582T4P37/31XEstQ5p58=
 github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b/go.mod h1:SBH7ygxi8pfUlaOkMMuAQtPIUF8ecWP5IEl/CR7VP2Q=
 github.com/google/renameio v0.1.0/go.mod h1:KWCgfxg9yswjAJkECMjeO8J8rahYeXnNhOm40UhjYkI=
+github.com/google/uuid v1.1.1/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/gorilla/websocket v1.4.1 h1:q7AeDBpnBk8AogcD4DSag/Ukw/KV+YhzLj2bP5HvKCM=
 github.com/gorilla/websocket v1.4.1/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
 github.com/jessemillar/jsonresp v1.1.0 h1:emgkdtwGlmJdnzjiwAgJ+qwkvPcxgTX0uVsA+WT6rZE=
@@ -67,6 +70,7 @@ github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINE
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
+github.com/segmentio/ksuid v1.0.3/go.mod h1:/XUiZBD3kVx5SmUOl55voK5yeAbBNNIed+2O73XgrPE=
 github.com/sevenNt/echo-pprof v0.1.0 h1:bRsATRChoF9c96I/TaxIG5RswJ4zrCO6/VnfTfbkWcg=
 github.com/sevenNt/echo-pprof v0.1.0/go.mod h1:3B009ccno8WPXjh4Ut/B2+FOVt/ulHBV8w/cNdsodXA=
 github.com/sparrc/go-ping v0.0.0-20190613174326-4e5b6552494c h1:gqEdF4VwBu3lTKGHS9rXE9x1/pEaSwCXRLOZRF6qtlw=

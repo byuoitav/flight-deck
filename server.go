@@ -3,7 +3,8 @@ package main
 import (
 	"net/http"
 
-	"github.com/byuoitav/authmiddleware"
+	"github.com/byuoitav/auth/middleware"
+	"github.com/byuoitav/auth/wso2"
 	"github.com/byuoitav/common"
 	"github.com/byuoitav/common/log"
 	"github.com/byuoitav/flight-deck/handlers"
@@ -18,7 +19,21 @@ func main() {
 		return c.String(http.StatusOK, "Ready for takeoff!")
 	})
 
-	secure := router.Group("", echo.WrapMiddleware(authmiddleware.Authenticate))
+	client := wso2.New("", "", "https://api.byu.edu", "")
+
+	secure := router.Group(
+		"",
+		echo.WrapMiddleware(client.JWTValidationMiddleware()),
+		func(next echo.HandlerFunc) echo.HandlerFunc {
+			return func(c echo.Context) error {
+				if middleware.Authenticated(c.Request()) {
+					next(c)
+					return nil
+				}
+				return c.JSON(http.StatusForbidden, map[string]string{"error": "Unauthorized"})
+			}
+		},
+	)
 
 	/* secure routes */
 	secure.GET("/webhook_device/:hostname", handlers.DeployByHostname)
