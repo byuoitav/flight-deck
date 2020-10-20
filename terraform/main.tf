@@ -82,6 +82,14 @@ resource "aws_s3_bucket" "bucket" {
     team             = "AV Engineering"
     data-sensitivity = "confidential"
   }
+
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
 }
 
 data "aws_iam_policy_document" "policy" {
