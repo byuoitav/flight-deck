@@ -151,8 +151,11 @@ func DeployToDevice(device structs.Device, designation string) (DeployReport, *n
 		return report, nerr.Translate(err).Addf("unable to retrieve docker-compose file: %v", err)
 	}
 	//Replace $SYSTEM_ID with the actual id
+	room := device.GetDeviceRoomID()
 	tmp := fmt.Sprintf("%s", dockerCompose)
 	tmp = strings.ReplaceAll(tmp, "$SYSTEM_ID", device.ID)
+	tmp = strings.ReplaceAll(tmp, "$DEVICE_ID", device.ID)
+	tmp = strings.ReplaceAll(tmp, "$ROOM_ID", room)
 	var byter bytes.Buffer
 	byter.WriteString(tmp)
 	dockerCompose = byter.Bytes()
