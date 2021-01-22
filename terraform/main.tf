@@ -1,8 +1,8 @@
 terraform {
   backend "s3" {
-    bucket     = "terraform-state-storage-586877430255"
+    bucket         = "terraform-state-storage-586877430255"
     dynamodb_table = "terraform-state-lock-586877430255"
-    region     = "us-west-2"
+    region         = "us-west-2"
 
     // THIS MUST BE UNIQUE
     key = "flight-deck.tfstate"
@@ -19,6 +19,7 @@ data "aws_ssm_parameter" "eks_cluster_endpoint" {
 
 provider "kubernetes" {
   host = data.aws_ssm_parameter.eks_cluster_endpoint.value
+  config_path = "~/.kube/config"
 }
 
 // pull all env vars out of ssm
@@ -130,7 +131,7 @@ module "stg_deployment" {
   // required
   name           = "flight-deck-stg"
   image          = "byuoitav/flight-deck"
-  image_version  = "development"
+  image_version  = "latest"
   container_port = 8008
   repo_url       = "https://github.com/byuoitav/flight-deck"
 
@@ -160,12 +161,13 @@ module "prd_deployment" {
   // required
   name           = "flight-deck-prd"
   image          = "byuoitav/flight-deck"
-  image_version  = "development"
+  image_version  = "latest"
   container_port = 8008
   repo_url       = "https://github.com/byuoitav/flight-deck"
 
   // optional
   iam_policy_doc = data.aws_iam_policy_document.policy.json
+  replicas       = 3
   public_urls    = ["flight-deck-prd.av.byu.edu"]
   container_env = {
     "AWS_BUCKET_REGION"          = aws_s3_bucket.bucket.region
