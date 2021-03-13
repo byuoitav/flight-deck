@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/byuoitav/authmiddleware/bearertoken"
 	"github.com/byuoitav/common/db"
@@ -354,8 +355,34 @@ func writeServiceTemplate(byter *bytes.Buffer, serviceConfig structs.ServiceConf
 	return nil
 }
 
+type couchService struct {
+	service     string
+	designation string
+}
+
+var (
+	services   map[couchService]map[string][]byte
+	servicesMu sync.Mutex
+)
+
+func init() {
+	services = make(map[couchService]map[string][]byte)
+}
+
 // GetCouchServiceFiles .
 func GetCouchServiceFiles(service, designation, deviceType, deviceID string) (map[string][]byte, error) {
+	servicesMu.Lock()
+	defer servicesMu.Unlock()
+
+	couchService := couchService{
+		service:     service,
+		designation: designation,
+	}
+
+	if v, ok := services[couchService]; ok {
+		return v, nil
+	}
+
 	objects := make(map[string][]byte)
 
 	//Handle Service Template
@@ -416,5 +443,6 @@ func GetCouchServiceFiles(service, designation, deviceType, deviceID string) (ma
 
 	}
 
+	services[couchService] = objects
 	return objects, nil
 }
