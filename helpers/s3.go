@@ -361,26 +361,20 @@ type couchService struct {
 }
 
 var (
-	services   map[couchService]map[string][]byte
+	services   map[couchService][]byte
 	servicesMu sync.Mutex
 )
 
 func init() {
-	services = make(map[couchService]map[string][]byte)
+	services = make(map[couchService][]byte)
 }
 
 // GetCouchServiceFiles .
 func GetCouchServiceFiles(service, designation, deviceType, deviceID string) (map[string][]byte, error) {
-	servicesMu.Lock()
-	defer servicesMu.Unlock()
 
 	couchService := couchService{
 		service:     service,
 		designation: designation,
-	}
-
-	if v, ok := services[couchService]; ok {
-		return v, nil
 	}
 
 	objects := make(map[string][]byte)
@@ -396,13 +390,21 @@ func GetCouchServiceFiles(service, designation, deviceType, deviceID string) (ma
 	writeServiceTemplate(&byter, serviceConfig, deviceType, designation, deviceID)
 	objects[fmt.Sprintf("%v.service", service)] = byter.Bytes()
 
-	//Handle tar.gz
-	tarball, err := db.GetDB().GetServiceZip(service, designation)
-	if err != nil {
-		log.L.Warnf("Couldn't get the tarball from couch: %v", err)
-		return objects, err
-	}
+	servicesMu.Lock()
+	tarball, ok := services[couchService]
+	if !ok {
+		tarball, err = db.GetDB().GetServiceZip(service, designation)
+		if err != nil {
+			log.L.Warnf("Couldn't get the tarball from couch: %v", err)
+			servicesMu.Unlock()
+			return objects, err
+		}
 
+		services[couchService] = tarball
+	}
+	servicesMu.Unlock()
+
+	//Handle tar.gz
 	gzf, err := gzip.NewReader(bytes.NewReader(tarball))
 	if err != nil {
 		log.L.Warnf("Coudn't make gzip reader for %v: %v", service, err)
@@ -443,6 +445,5 @@ func GetCouchServiceFiles(service, designation, deviceType, deviceID string) (ma
 
 	}
 
-	services[couchService] = objects
 	return objects, nil
 }
