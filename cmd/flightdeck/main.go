@@ -58,7 +58,9 @@ func main() {
 	r.Use(gin.Recovery())
 
 	api := r.Group("/api/v1/")
-	api.GET("/deployToDevice/:deviceID", handlers.DeployByDeviceID)
+	api.GET("/deploy/:deviceID", handlers.DeployByDeviceID)
+	api.GET("/refloat/:deviceID", handlers.RefloatByDeviceID)
+	api.GET("/rebuild/:deviceID", handlers.RebuildByDeviceID)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
