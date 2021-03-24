@@ -1,13 +1,13 @@
 package main
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"net"
 	"net/http"
-	"time"
 
+	"github.com/byuoitav/flight-deck/internal/app/flightdeck/handlers"
+	"github.com/byuoitav/flight-deck/internal/pkg/ansible"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/pflag"
 	"go.uber.org/zap"
@@ -17,19 +17,34 @@ func main() {
 	var (
 		port     int
 		logLevel string
+
+		pathDeployPlaybook string
+		pathInventory      string
+		pathVaultPassword  string
 	)
 
 	pflag.CommandLine.IntVarP(&port, "port", "P", 8080, "port to run the server on")
 	pflag.StringVarP(&logLevel, "log-level", "L", "", "level to log at. refer to https://godoc.org/go.uber.org/zap/zapcore#Level for options")
+	pflag.StringVarP(&pathDeployPlaybook, "deploy-playbook", "", "", "path to the ansible deployment playbook")
+	pflag.StringVarP(&pathInventory, "inventory", "", "", "path to the ansible inventory file")
+	pflag.StringVarP(&pathVaultPassword, "vault-password", "", "", "path to the ansible vault password file")
 
 	pflag.Parse()
 
 	// ctx for setup
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+	//ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	//defer cancel()
 
 	_, log := logger(logLevel)
 	defer log.Sync() // nolint:errcheck
+
+	handlers := handlers.Handlers{
+		Deployer: &ansible.Client{
+			PathDeployPlaybook: pathDeployPlaybook,
+			PathInventory:      pathInventory,
+			PathVaultPassword:  pathVaultPassword,
+		},
+	}
 
 	// TODO wso2
 
@@ -37,8 +52,7 @@ func main() {
 	r.Use(gin.Recovery())
 
 	api := r.Group("/api/v1/")
-	api.GET("/deployToDevice/:deviceID", func(c *gin.Context) {
-	})
+	api.GET("/deployToDevice/:deviceID", handlers.DeployByDeviceID)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
