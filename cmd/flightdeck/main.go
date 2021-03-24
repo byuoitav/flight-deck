@@ -18,14 +18,18 @@ func main() {
 		port     int
 		logLevel string
 
-		pathDeployPlaybook string
-		pathInventory      string
-		pathVaultPassword  string
+		pathDeployPlaybook  string
+		pathRefloatPlaybook string
+		pathRebuildPlaybook string
+		pathInventory       string
+		pathVaultPassword   string
 	)
 
 	pflag.CommandLine.IntVarP(&port, "port", "P", 8080, "port to run the server on")
 	pflag.StringVarP(&logLevel, "log-level", "L", "", "level to log at. refer to https://godoc.org/go.uber.org/zap/zapcore#Level for options")
 	pflag.StringVarP(&pathDeployPlaybook, "deploy-playbook", "", "", "path to the ansible deployment playbook")
+	pflag.StringVarP(&pathRefloatPlaybook, "refloat-playbook", "", "", "path to the ansible refloat playbook")
+	pflag.StringVarP(&pathRebuildPlaybook, "rebuild-playbook", "", "", "path to the ansible rebuild playbook")
 	pflag.StringVarP(&pathInventory, "inventory", "", "", "path to the ansible inventory file")
 	pflag.StringVarP(&pathVaultPassword, "vault-password", "", "", "path to the ansible vault password file")
 
@@ -40,9 +44,11 @@ func main() {
 
 	handlers := handlers.Handlers{
 		Deployer: &ansible.Client{
-			PathDeployPlaybook: pathDeployPlaybook,
-			PathInventory:      pathInventory,
-			PathVaultPassword:  pathVaultPassword,
+			PathDeployPlaybook:  pathDeployPlaybook,
+			PathRefloatPlaybook: pathRefloatPlaybook,
+			PathRebuildPlaybook: pathRebuildPlaybook,
+			PathInventory:       pathInventory,
+			PathVaultPassword:   pathVaultPassword,
 		},
 	}
 
