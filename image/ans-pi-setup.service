@@ -1,0 +1,15 @@
+[Unit]
+Description=Pi setup
+After=getty@tty2.service
+
+[Service]
+Type=oneshot
+ExecStart=/byu/ans-pi-setup.sh
+EnvironmentFile=/etc/environment
+StandardInput=tty
+TTYPath=/dev/tty2
+TTYReset=yes
+TTYVHangup=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -83,8 +83,8 @@ func main() {
 	e.GET("/hostname/", emptyHostnameHandler) // catch empty hostnames
 	e.GET("/hostname/:hostname", hostnameSetHandler)
 
-	// float/second boot stuff (set hn/ip)
-	e.GET("/float", floatHandler)
+	// Deploying from Ansible after first reboot
+	e.GET("/deploy", deployHandler)
 
 	// reboot the pi
 	e.GET("/reboot", rebootHandler)
@@ -191,7 +191,7 @@ func redirectHandler(c echo.Context) error {
 		return c.Redirect(http.StatusTemporaryRedirect, "/pages/start")
 	}
 
-	return c.Redirect(http.StatusTemporaryRedirect, "/pages/floating")
+	return c.Redirect(http.StatusTemporaryRedirect, "/pages/deploying")
 }
 
 func setHostnameHandler(c echo.Context) error {
@@ -283,7 +283,7 @@ func ignoreSubnetHandler(c echo.Context) error {
 	return c.Redirect(http.StatusTemporaryRedirect, "/pages/start")
 }
 
-func floatHandler(c echo.Context) error {
+func deployHandler(c echo.Context) error {
 	if len(data.ActualHostname) == 0 || data.ActualHostname == "raspberrypi" {
 		return c.Redirect(http.StatusTemporaryRedirect, "/redirect")
 	}
@@ -295,8 +295,8 @@ func floatHandler(c echo.Context) error {
 		return c.Redirect(http.StatusTemporaryRedirect, "/redirect")
 	}
 
-	// hit the float endpoint
-	err := float()
+	// hit the ansible deploy endpoint
+	err := deploy(data.ActualHostname)
 	data.Lock()
 	defer data.Unlock()
 
@@ -306,21 +306,10 @@ func floatHandler(c echo.Context) error {
 	case errors.Is(err, ErrDeviceNotFound):
 		return c.Redirect(http.StatusTemporaryRedirect, "/pages/hostnameNotFound")
 	case err != nil:
-		return c.Redirect(http.StatusTemporaryRedirect, "/pages/floatingFailed")
+		return c.Redirect(http.StatusTemporaryRedirect, "/pages/deployingFailed")
 	}
 
-	go func() {
-		// start whatever needs to happen in the background
-		if err = saltDeployment(); err != nil {
-			data.Lock()
-			data.Error = fmt.Errorf("failed to do salt deployment: %w", err)
-			data.Unlock()
-
-			log.Printf("failed to do salt deployment: %s", err)
-		}
-	}()
-
-	data.ProgressTitle = "Downloading Code..."
+	data.ProgressTitle = "Deploying Code from Ansible..."
 	data.ProgressPercent = 0
 
 	return c.Redirect(http.StatusTemporaryRedirect, "/pages/progress")
