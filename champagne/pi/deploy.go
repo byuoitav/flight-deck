@@ -6,24 +6,19 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"math/rand"
+	//"math/rand"
 	"net/http"
 	"os"
 	"os/exec"
 	"time"
-
-	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/client"
-	"gopkg.in/yaml.v2"
+	//"github.com/docker/docker/api/types"
+	//"github.com/docker/docker/client"
+	//"gopkg.in/yaml.v2"
 )
 
 const (
-	DeployURL         = "http://ansible.av.byu.edu:8080/api/v1/deploy/"
-	EnvironmentFile   = "/etc/environment"
-	DeploymentFile    = "/tmp/deployment.log"
-	SaltMinionFile    = "/etc/salt/minion"
-	SaltMinionIDFile  = "/etc/salt/minion_id"
-	DockerComposeFile = "/tmp/docker-compose.yml"
+	DeployURL      = "http://ansible.av.byu.edu:8080/api/v1/deploy/"
+	DeploymentFile = "/tmp/deployment.log"
 )
 
 var (
@@ -57,7 +52,7 @@ type options struct {
 	MaxBufferSize string `yaml:"max-buffer-size,omitempty"`
 }
 
-func deploy(hostname) error {
+func ansible_deploy(hostname string) error {
 	log.Printf("Deploying from Ansible...")
 
 	FullDeployURL := DeployURL + hostname
@@ -69,6 +64,7 @@ func deploy(hostname) error {
 	log.Printf("%s", data.ProgressMessage)
 	data.Unlock()
 
+	// Creating new Post Request to start ansible deployment
 	req, err := http.NewRequestWithContext(context.TODO(), http.MethodPost, FullDeployURL, nil)
 	if err != nil {
 		return fmt.Errorf("failed to deploy: %w", err)
@@ -92,30 +88,34 @@ func deploy(hostname) error {
 	switch resp.StatusCode {
 	case http.StatusOK:
 		// wait for deployment file and environment file
-		ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
-		defer cancel()
+		/*
+			ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
+			defer cancel()
 
-		log.Printf("Waiting for deployment file...")
+			log.Printf("Waiting for deployment file...")
 
-		if err := waitForFile(ctx, DeploymentFile, false); err != nil {
-			return fmt.Errorf("deployment file never showed up: %s", err)
-		}
+			if err := waitForFile(ctx, DeploymentFile, false); err != nil {
+				return fmt.Errorf("deployment file never showed up: %s", err)
+			}
 
-		log.Printf("Waiting for environment file...")
+			log.Printf("Waiting for environment file...")
 
-		if err := waitForFile(ctx, EnvironmentFile, true); err != nil {
-			return fmt.Errorf("environment file never showed up: %s", err)
-		}
+			if err := waitForFile(ctx, EnvironmentFile, true); err != nil {
+				return fmt.Errorf("environment file never showed up: %s", err)
+			}
 
-		return source(EnvironmentFile)
+			return source(EnvironmentFile)
+		*/
+		log.Printf("Waiting for deployment to finish.....")
+		return nil
 	case http.StatusForbidden:
-		return fmt.Errorf("failed to float: %w", ErrDeviceNotFound)
+		return fmt.Errorf("failed to deploy: %w", ErrDeviceNotFound)
 	case http.StatusNotFound:
-		return fmt.Errorf("failed to float: %s", buf)
+		return fmt.Errorf("failed to deploy: %s", buf)
 	case http.StatusInternalServerError:
-		return fmt.Errorf("failed to float: unkown error: %s", buf)
+		return fmt.Errorf("failed to deploy: unknown error: %s", buf)
 	default:
-		return fmt.Errorf("failed to float: unkown status code %d: %s", resp.StatusCode, buf)
+		return fmt.Errorf("failed to deploy: unknown status code %d: %s", resp.StatusCode, buf)
 	}
 
 	// Finishing deployment and removing the setup service from the system and rebooting pi
@@ -123,7 +123,7 @@ func deploy(hostname) error {
 	if err != nil {
 		return fmt.Errorf("failed to finish deployment: %w", err)
 	}
-
+	return nil
 }
 
 func finishDeployment() error {
@@ -163,7 +163,7 @@ func finishDeployment() error {
 		}
 	*/
 	// schedule a reboot (will shutdown in 1 minute)
-	cmd = exec.Command("shutdown", "-r")
+	cmd := exec.Command("shutdown", "-r")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {

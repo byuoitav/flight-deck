@@ -296,7 +296,7 @@ func deployHandler(c echo.Context) error {
 	}
 
 	// hit the ansible deploy endpoint
-	err := deploy(data.ActualHostname)
+	err := ansible_deploy(data.ActualHostname)
 	data.Lock()
 	defer data.Unlock()
 
