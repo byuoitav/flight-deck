@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	DeployURL      = "http://ansible.av.byu.edu:8080/api/v1/deploy/"
+	DeployURL      = "http://ansible.av.byu.edu/api/v1/deploy/"
 	DeploymentFile = "/tmp/deployment.log"
 )
 
