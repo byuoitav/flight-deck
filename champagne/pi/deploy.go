@@ -118,7 +118,7 @@ func finishDeployment() error {
 	}
 
 	// disable myself (will kill the program!!!!)
-	cmd = exec.Command("systemctl", "disable", "ans-pi-setup.service")
+	cmd = exec.Command("systemctl", "disable", "pi-setup.service")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
