@@ -6,14 +6,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	//"math/rand"
 	"net/http"
 	"os"
 	"os/exec"
 	"time"
-	//"github.com/docker/docker/api/types"
-	//"github.com/docker/docker/client"
-	//"gopkg.in/yaml.v2"
 )
 
 const (
@@ -87,25 +83,6 @@ func ansible_deploy(hostname string) error {
 
 	switch resp.StatusCode {
 	case http.StatusOK:
-		// wait for deployment file and environment file
-		/*
-			ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
-			defer cancel()
-
-			log.Printf("Waiting for deployment file...")
-
-			if err := waitForFile(ctx, DeploymentFile, false); err != nil {
-				return fmt.Errorf("deployment file never showed up: %s", err)
-			}
-
-			log.Printf("Waiting for environment file...")
-
-			if err := waitForFile(ctx, EnvironmentFile, true); err != nil {
-				return fmt.Errorf("environment file never showed up: %s", err)
-			}
-
-			return source(EnvironmentFile)
-		*/
 		log.Printf("Waiting for deployment to finish.....")
 		return nil
 	case http.StatusForbidden:
@@ -122,41 +99,6 @@ func ansible_deploy(hostname string) error {
 }
 
 func finishDeployment() error {
-	/*
-		// get a random final message
-		rand.Seed(time.Now().UnixNano())
-		idx := rand.Intn(len(FinalProgressMessages))
-
-		timeout := 600
-		done := false
-
-		for {
-			time.Sleep(7 * time.Second)
-			timeout += 7
-			data.Lock()
-
-			runningDockers, err := cli.ContainerList(context.TODO(), types.ContainerListOptions{})
-			if err != nil {
-				return fmt.Errorf("unable to get list of running docker containers: %s", err)
-			}
-
-			switch {
-			case len(runningDockers) < len(dockers.Services):
-				data.ProgressMessage = fmt.Sprintf("downloaded %d/%d applications", len(runningDockers), len(dockers.Services))
-			case len(runningDockers) == len(dockers.Services):
-				done = true
-				break
-			default:
-				data.ProgressMessage = FinalProgressMessages[idx]
-			}
-
-			data.ProgressPercent = int(100 * float32(len(runningDockers)) / float32(len(dockers.Services)))
-			data.Unlock()
-			if done {
-				break
-			}
-		}
-	*/
 
 	data.Lock()
 	data.ProgressMessage = "finished! rebooting in 1 minute."
@@ -174,15 +116,6 @@ func finishDeployment() error {
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("failed to run %q: %w", "shutdown -r", err)
 	}
-
-	data.Lock()
-	data.ProgressMessage = "finished! rebooting in 1 minute."
-	data.ProgressPercent = 99
-	log.Printf("%s", data.ProgressMessage)
-	data.Unlock()
-
-	// so that the ui can refresh
-	time.Sleep(30 * time.Second)
 
 	// disable myself (will kill the program!!!!)
 	cmd = exec.Command("systemctl", "disable", "ans-pi-setup.service")
