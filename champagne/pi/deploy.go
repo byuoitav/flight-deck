@@ -118,11 +118,6 @@ func ansible_deploy(hostname string) error {
 		return fmt.Errorf("failed to deploy: unknown status code %d: %s", resp.StatusCode, buf)
 	}
 
-	// Finishing deployment and removing the setup service from the system and rebooting pi
-	err = finishDeployment()
-	if err != nil {
-		return fmt.Errorf("failed to finish deployment: %w", err)
-	}
 	return nil
 }
 
