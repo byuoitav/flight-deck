@@ -157,6 +157,16 @@ func finishDeployment() error {
 			}
 		}
 	*/
+
+	data.Lock()
+	data.ProgressMessage = "finished! rebooting in 1 minute."
+	data.ProgressPercent = 99
+	log.Printf("%s", data.ProgressMessage)
+	data.Unlock()
+
+	// so that the ui can refresh
+	time.Sleep(30 * time.Second)
+
 	// schedule a reboot (will shutdown in 1 minute)
 	cmd := exec.Command("shutdown", "-r")
 	cmd.Stdout = os.Stdout
@@ -175,7 +185,7 @@ func finishDeployment() error {
 	time.Sleep(30 * time.Second)
 
 	// disable myself (will kill the program!!!!)
-	cmd = exec.Command("systemctl", "disable", "pi-setup.service")
+	cmd = exec.Command("systemctl", "disable", "ans-pi-setup.service")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
