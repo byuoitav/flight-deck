@@ -65,7 +65,7 @@ func ansible_deploy(hostname string) error {
 	data.Unlock()
 
 	// Creating new Post Request to start ansible deployment
-	req, err := http.NewRequestWithContext(context.TODO(), http.MethodPost, FullDeployURL, nil)
+	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, FullDeployURL, nil)
 	if err != nil {
 		return fmt.Errorf("failed to deploy: %w", err)
 	}
