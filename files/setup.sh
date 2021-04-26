@@ -4,17 +4,6 @@ echo ""
 echo "Hi From Danny"
 echo ""
 
-# pin docker version
-cat <<EOT >>/etc/apt/preferences.d/docker
-Package: docker-ce
-Pin: version 5:19.03.14~3-0~raspbian-buster
-Pin-Priority: 1001
-
-Package: docker-ce-cli
-Pin: version 5:19.03.14~3-0~raspbian-buster
-Pin-Priority: 1001
-EOT
-
 mkdir -p /etc/i3
 
 # download i3 config
