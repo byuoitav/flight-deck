@@ -16,16 +16,18 @@ import (
 	"go.uber.org/zap"
 )
 
-func MiddlewareWso2(c gin.HandlerFunc) gin.HandlerFunc {
+func MiddlewareWso2() gin.HandlerFunc {
 
-	if middleware.Authenticated(c.Request) {
-		c.Next()
-		return nil
+	client := wso2.New("", "", "https://api.byu.edu", "")
+	client.JWTValidationMiddleware()
+	return func(c *gin.Context) {
+		if middleware.Authenticated(c.Request) {
+			c.Next()
+		}
+		fmt.Printf("WSO2 Authentication Failed")
+		fmt.Printf("Output of JWT: %s", c.Request)
+		c.JSON(http.StatusForbidden, map[string]string{"error": "Unauthorized"})
 	}
-	fmt.Printf("WSO2 Authentication Failed")
-	fmt.Printf("Output of JWT: %s", c.Request)
-	return c.JSON(http.StatusForbidden, map[string]string{"error": "Unauthorized"})
-
 }
 
 func main() {
@@ -74,8 +76,6 @@ func main() {
 	r := gin.New()
 	r.Use(gin.Recovery())
 
-	client := wso2.New("", "", "https://api.byu.edu", "")
-
 	r.GET("/healthz", func(c *gin.Context) {
 		c.JSON(http.StatusOK, fmt.Sprintf("Flightdeck Standing By..."))
 		return
@@ -87,8 +87,8 @@ func main() {
 	}
 	// WSO2 and OPA Middleware added to /api/v1
 	api := r.Group("/api/v1/")
-	api.Use(MiddlewareWso2(client.JWTValidationMiddleware()))
-	api.Use(o.Authorize)
+	api.Use(MiddlewareWso2())
+	api.Use(o.Authorize())
 
 	api.GET("/deploy/:deviceID", handlers.DeployByDeviceID)
 	api.GET("/refloat/:deviceID", handlers.RefloatByDeviceID)
