@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"sync"
 
 	"github.com/byuoitav/auth/middleware"
 	"github.com/byuoitav/auth/wso2"
@@ -41,7 +42,7 @@ func main() {
 	var (
 		port     int
 		logLevel string
-
+		wg       sync.WaitGroup
 		//opaURL              string
 		//opaToken            string
 		pathDeployPlaybook  string
@@ -104,10 +105,12 @@ func main() {
 	api.POST("/deploy/:deviceID", handlers.DeployByDeviceID)
 	api.POST("/refloat/:deviceID", func(c *gin.Context) {
 		cCp := c.Copy()
+		wg.Add(1)
 		go func() {
 			handlers.RefloatByDeviceID(cCp)
 		}()
-		c.JSON(http.StatusOK, fmt.Sprintf("Refloat Command Sent"))
+		//c.JSON(http.StatusOK, fmt.Sprintf("Refloat Command Sent"))
+		defer wg.Wait()
 	})
 
 	api.POST("/rebuild/:deviceID", handlers.RebuildByDeviceID)
