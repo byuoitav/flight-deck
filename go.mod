@@ -13,6 +13,7 @@ require (
 	github.com/fatih/color v1.9.0 // indirect
 	github.com/gin-gonic/gin v1.6.3
 	github.com/gorilla/websocket v1.4.1
+	github.com/gwatts/gin-adapter v0.0.0-20170508204228-c44433c485ad
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/labstack/gommon v0.3.0 // indirect
 	github.com/sevenNt/echo-pprof v0.1.0 // indirect
