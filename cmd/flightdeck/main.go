@@ -5,15 +5,15 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"sync"
 
 	"github.com/byuoitav/auth/middleware"
 	"github.com/byuoitav/auth/wso2"
 	"github.com/byuoitav/flight-deck/internal/app/flightdeck/handlers"
+
 	//"github.com/byuoitav/flight-deck/internal/app/flightdeck/opa"
 	"github.com/byuoitav/flight-deck/internal/pkg/ansible"
 	"github.com/gin-gonic/gin"
-	"github.com/gwatts/gin-adapter"
+	adapter "github.com/gwatts/gin-adapter"
 	"github.com/spf13/pflag"
 	"go.uber.org/zap"
 )
@@ -42,7 +42,6 @@ func main() {
 	var (
 		port     int
 		logLevel string
-		wg       sync.WaitGroup
 		//opaURL              string
 		//opaToken            string
 		pathDeployPlaybook  string
@@ -105,12 +104,10 @@ func main() {
 	api.POST("/deploy/:deviceID", handlers.DeployByDeviceID)
 	api.POST("/refloat/:deviceID", func(c *gin.Context) {
 		cCp := c.Copy()
-		wg.Add(1)
 		go func() {
 			handlers.RefloatByDeviceID(cCp)
 		}()
-		//c.JSON(http.StatusOK, fmt.Sprintf("Refloat Command Sent"))
-		defer wg.Wait()
+		c.JSON(http.StatusOK, fmt.Sprintf("Refloat Command Sent"))
 	})
 
 	api.POST("/rebuild/:deviceID", handlers.RebuildByDeviceID)
