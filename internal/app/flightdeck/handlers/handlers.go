@@ -16,7 +16,7 @@ type Handlers struct {
 }
 
 func (h *Handlers) DeployByDeviceID(c *gin.Context) {
-	ctx, cancel := context.WithTimeout(c.Request.Context(), 30*time.Minute)
+	ctx, cancel := context.WithTimeout(context.TODO(), 30*time.Minute)
 	defer cancel()
 
 	if err := h.Deployer.Deploy(ctx, c.Param("deviceID")); err != nil {
@@ -24,7 +24,6 @@ func (h *Handlers) DeployByDeviceID(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusOK)
 }
 
 func (h *Handlers) RefloatByDeviceID(c *gin.Context) {
@@ -40,7 +39,7 @@ func (h *Handlers) RefloatByDeviceID(c *gin.Context) {
 }
 
 func (h *Handlers) RebuildByDeviceID(c *gin.Context) {
-	ctx, cancel := context.WithTimeout(c.Request.Context(), 30*time.Minute)
+	ctx, cancel := context.WithTimeout(context.TODO(), 30*time.Minute)
 	defer cancel()
 
 	if err := h.Deployer.Rebuild(ctx, c.Param("deviceID")); err != nil {
@@ -48,5 +47,4 @@ func (h *Handlers) RebuildByDeviceID(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusOK)
 }

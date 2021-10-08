@@ -9,6 +9,7 @@ import (
 
 	m "github.com/byuoitav/auth/middleware"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 type Client struct {
@@ -36,7 +37,7 @@ type requestData struct {
 	Method string `json:"method"`
 }
 
-func (client *Client) Authorize() gin.HandlerFunc {
+func (client *Client) Authorize(log *zap.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		// Initial data
@@ -49,9 +50,10 @@ func (client *Client) Authorize() gin.HandlerFunc {
 
 		// use either the user netid for the authorization request or an
 		// API key if one was used instead
-		if user, ok := c.Request.Context().Value("userBYUID").(string); ok {
+		if user, ok := c.Request.Context().Value("user").(string); ok {
 			opaData.Input.User = user
-			fmt.Printf("User Found")
+			log.Debug("User Found\n")
+			log.Debug(fmt.Sprintf("Username: %s\n", c.Request.Context().Value("user").(string)))
 		} else if apiKey, ok := m.GetAVAPIKey(c.Request.Context()); ok {
 			opaData.Input.APIKey = apiKey
 		}
@@ -59,9 +61,8 @@ func (client *Client) Authorize() gin.HandlerFunc {
 		// Prep the request
 		oReq, err := json.Marshal(opaData)
 		if err != nil {
-			fmt.Errorf("Error trying to create request to OPA: %s\n", err)
+			log.Error(fmt.Sprintf("Error trying to create request to OPA: %s\n", err))
 			c.JSON(http.StatusInternalServerError, gin.H{"Error contacting authorization server": err.Error()})
-			return
 		}
 
 		req, err := http.NewRequest(
@@ -70,39 +71,39 @@ func (client *Client) Authorize() gin.HandlerFunc {
 			bytes.NewReader(oReq),
 		)
 
+		log.Debug(fmt.Sprintf("%s/v1/data/flightdeck\n", client.URL))
+
 		req.Header.Set("authorization", fmt.Sprintf("Bearer %s", client.Token))
 
-		fmt.Printf("Data: %s\n", opaData)
-		fmt.Printf("URL: %s\n", client.URL)
+		log.Debug(fmt.Sprintf("Data: %s\n", opaData))
+		log.Debug(fmt.Sprintf("URL: %s\n", client.URL))
 
 		// Make the request
 		res, err := http.DefaultClient.Do(req)
 		if err != nil {
-			fmt.Errorf("Error while making request to OPA: %s", err)
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
+			log.Error(fmt.Sprintf("Error while making request to OPA: %s", err))
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		}
 		if res.StatusCode != http.StatusOK {
-			fmt.Errorf("Got back non 200 status from OPA: %d", res.StatusCode)
-			c.JSON(http.StatusInternalServerError, gin.H{"Authorization server returned non 200 status": err.Error()})
-			return
+			log.Error(fmt.Sprintf("Got back non 200 status from OPA: %d", res.StatusCode))
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"Authorization server returned non 200 status": err.Error()})
 		}
 
 		// Read the body
 		body, err := ioutil.ReadAll(res.Body)
 		if err != nil {
-			fmt.Errorf("Unable to read body from OPA: %s", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"Authorization server returned non 200 status": err.Error()})
-			return
+			log.Error(fmt.Sprintf("Unable to read body from OPA: %s", err))
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"Authorization server returned non 200 status": err.Error()})
 		}
+
+		log.Debug(fmt.Sprintf("Body Output: %s", body))
 
 		// Unmarshal the body
 		oRes := opaResponse{}
 		err = json.Unmarshal(body, &oRes)
 		if err != nil {
 			fmt.Errorf("Unable to parse body from OPA: %s", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"Upable to parse body from OPA Server": err.Error()})
-			return
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"Unable to parse body from OPA Server": err.Error()})
 		}
 
 		// If OPA approved then allow the request, else reject with a 403
@@ -110,8 +111,7 @@ func (client *Client) Authorize() gin.HandlerFunc {
 			c.Next()
 			return
 		} else {
-			c.JSON(http.StatusForbidden, gin.H{"ServerStatus": "Forbidden"})
-			return
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"ServerStatus": oRes.Result.Allow})
 		}
 	}
 }
