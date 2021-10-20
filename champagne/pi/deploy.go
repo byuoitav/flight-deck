@@ -54,7 +54,7 @@ func ansible_deploy(hostname string) error {
 	FullDeployURL := DeployURL + hostname
 
 	data.Lock()
-	data.ProgressMessage = "Deploying from Ansible...Will Take 10-15 Minutes"
+	data.ProgressMessage = "Deploying from Ansible..."
 	data.ProgressPercent = 30
 
 	log.Printf("%s", data.ProgressMessage)

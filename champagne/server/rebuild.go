@@ -14,9 +14,9 @@ import (
 )
 
 // handleFloat handles the incoming request to float a pi
-func (s *Server) handleFloat(c echo.Context) error {
+func (s *Server) handleRebuild(c echo.Context) error {
 
-	log.L.Debugf("Starting to attempt float for ip: %s", c.RealIP())
+	log.L.Debugf("Starting to attempt a rebuild for ip: %s", c.RealIP())
 
 	// Do a reverse dns lookup on the incoming ip address
 	names, err := net.LookupAddr(c.RealIP())
@@ -32,7 +32,7 @@ func (s *Server) handleFloat(c echo.Context) error {
 
 	// Find a properly formatted name
 	for _, n := range names {
-		// Remove trailing domains, get only the hostname not FQD
+		// Remove trailing domains, get only the hostname not FQDN
 		n = strings.SplitN(n, ".", 2)[0]
 		// See if it matches ABC-123-AB2 format
 		matched, _ := regexp.MatchString("^[[:alnum:]]+-[[:alnum:]]+-[[:alnum:]]+$", n)
@@ -82,7 +82,7 @@ func (s *Server) handleFloat(c echo.Context) error {
 	res := struct {
 		Message string
 	}{
-		Message: fmt.Sprintf("Successfully Floated %s", name),
+		Message: fmt.Sprintf("Successfully Rebuilt %s", name),
 	}
 
 	c.JSON(http.StatusOK, res)
@@ -92,11 +92,11 @@ func (s *Server) handleFloat(c echo.Context) error {
 
 // floatDevice attempts to get flight-deck to float to the given name from the
 // given location
-func (s *Server) floatDevice(name, env string) error {
+func (s *Server) rebuildDevice(name, env string) error {
 
 	// Make the request to flight-deck
 	res, err := s.wso2Client.Get(fmt.Sprintf(
-		"https://api.byu.edu/domains/av/flight-deck/%s/refloat/%s",
+		"https://api.byu.edu/domains/av/flight-deck/%s/rebuild/%s",
 		env,
 		name,
 	))

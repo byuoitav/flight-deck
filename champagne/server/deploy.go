@@ -14,9 +14,9 @@ import (
 )
 
 // handleFloat handles the incoming request to float a pi
-func (s *Server) handleFloat(c echo.Context) error {
+func (s *Server) handleDeploy(c echo.Context) error {
 
-	log.L.Debugf("Starting to attempt float for ip: %s", c.RealIP())
+	log.L.Debugf("Starting to attempt to deploy for ip: %s", c.RealIP())
 
 	// Do a reverse dns lookup on the incoming ip address
 	names, err := net.LookupAddr(c.RealIP())
@@ -50,10 +50,10 @@ func (s *Server) handleFloat(c echo.Context) error {
 	}
 
 	log.L.Debugf("Final name: %s", name)
-	log.L.Debugf("Trying to float %s from prod", name)
+	log.L.Debugf("Trying to deploy %s from prod", name)
 
-	// Try floating to prod
-	err = s.floatDevice(name, "prd")
+	// Try deploying to prod
+	err = s.deployDevice(name, "prd")
 	if err != nil && errors.Is(err, errDeviceNotFound) {
 		// If not found in prd then try stg
 		log.L.Debugf("Device %s not found in prd, trying stg", name)
@@ -82,7 +82,7 @@ func (s *Server) handleFloat(c echo.Context) error {
 	res := struct {
 		Message string
 	}{
-		Message: fmt.Sprintf("Successfully Floated %s", name),
+		Message: fmt.Sprintf("Successfully Deployed %s", name),
 	}
 
 	c.JSON(http.StatusOK, res)
@@ -92,11 +92,11 @@ func (s *Server) handleFloat(c echo.Context) error {
 
 // floatDevice attempts to get flight-deck to float to the given name from the
 // given location
-func (s *Server) floatDevice(name, env string) error {
+func (s *Server) deployDevice(name, env string) error {
 
 	// Make the request to flight-deck
 	res, err := s.wso2Client.Get(fmt.Sprintf(
-		"https://api.byu.edu/domains/av/flight-deck/%s/refloat/%s",
+		"https://api.byu.edu/domains/av/flight-deck/%s/deploy/%s",
 		env,
 		name,
 	))
