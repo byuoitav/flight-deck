@@ -98,16 +98,6 @@ func (s *Server) floatDevice(name, env string) error {
 	log.L.Debugf("URL: %s", URL)
 
 	// Make the request to WSO2
-	/*
-		res, err := s.wso2Client.Get(fmt.Sprintf(
-			"https://api.byu.edu:443/domains/av/flight-deck/dev/refloat/%s",
-			name,
-		))
-		if err != nil {
-			return fmt.Errorf("Error while making request to flight-deck: %w", err)
-		}*/
-
-	// Make the request to WSO2
 	req, err := http.NewRequest("POST", URL, nil)
 	if err != nil {
 		return fmt.Errorf("Error Building Request: %w", err)
