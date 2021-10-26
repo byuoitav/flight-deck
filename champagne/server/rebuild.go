@@ -50,7 +50,7 @@ func (s *Server) handleRebuild(c echo.Context) error {
 	}
 
 	log.L.Debugf("Final name: %s", name)
-	log.L.Debugf("Trying to float %s from prod", name)
+	log.L.Debugf("Trying to rebuild %s from prod", name)
 
 	// Try floating to prod
 	err = s.floatDevice(name, "prd")
@@ -94,14 +94,18 @@ func (s *Server) handleRebuild(c echo.Context) error {
 // given location
 func (s *Server) rebuildDevice(name, env string) error {
 
-	// Make the request to flight-deck
-	res, err := s.wso2Client.Get(fmt.Sprintf(
-		"https://api.byu.edu/domains/av/flight-deck/%s/rebuild/%s",
-		env,
-		name,
-	))
+	URL := fmt.Sprintf("https://api.byu.edu:443/domains/av/flight-deck/dev/rebuild/%s", name)
+	log.L.Debugf("URL: %s", URL)
+
+	req, err := http.NewRequest("POST", URL, nil)
 	if err != nil {
-		return fmt.Errorf("Error while making request to flight-deck: %w", err)
+		return fmt.Errorf("Error Building Request: %w", err)
+	}
+
+	// Make the request to flight-deck
+	res, err := s.wso2Client.Do(req)
+	if err != nil {
+		return fmt.Errorf("Error is sending response: %w", err)
 	}
 
 	// If we got an error back try to figure out what went wrong

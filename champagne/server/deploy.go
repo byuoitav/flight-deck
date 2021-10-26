@@ -93,15 +93,18 @@ func (s *Server) handleDeploy(c echo.Context) error {
 // floatDevice attempts to get flight-deck to float to the given name from the
 // given location
 func (s *Server) deployDevice(name, env string) error {
+	URL := fmt.Sprintf("https://api.byu.edu:443/domains/av/flight-deck/dev/deploy/%s", name)
+	log.L.Debugf("URL: %s", URL)
 
-	// Make the request to flight-deck
-	res, err := s.wso2Client.Get(fmt.Sprintf(
-		"https://api.byu.edu/domains/av/flight-deck/%s/deploy/%s",
-		env,
-		name,
-	))
+	// Make the request to WSO2
+	req, err := http.NewRequest("POST", URL, nil)
 	if err != nil {
-		return fmt.Errorf("Error while making request to flight-deck: %w", err)
+		return fmt.Errorf("Error Building Request: %w", err)
+	}
+
+	res, err := s.wso2Client.Do(req)
+	if err != nil {
+		return fmt.Errorf("Error is sending response: %w", err)
 	}
 
 	// If we got an error back try to figure out what went wrong
