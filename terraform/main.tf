@@ -7,6 +7,17 @@ terraform {
     // THIS MUST BE UNIQUE
     key = "flight-deck.tfstate"
   }
+
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+      version = "~> 3.0"
+    }
+    kubernetes = {
+      source = "hashicorp/kubernetes"
+    }
+  }
+  required_version = ">= 0.13"
 }
 
 provider "aws" {
