@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	DeployURL      = "http://ansible.av.byu.edu:8080/api/v1/deploy/"
+	DeployURL      = "http://10.5.34.222:2001/deploy"
 	DeploymentFile = "/tmp/deployment.log"
 )
 
@@ -51,22 +51,28 @@ type options struct {
 func ansible_deploy(hostname string) error {
 	log.Printf("Deploying from Ansible...")
 
-	FullDeployURL := DeployURL + hostname
+	// Removing error.log file if one already exists
+	if _, err := os.Stat("/tmp/error.log"); err == nil {
+		err := os.Remove("/tmp/error.log")
+		if err != nil {
+			fmt.Errorf("Failed to remove error file")
+		}
+	}
 
 	data.Lock()
 	data.ProgressMessage = "Deploying from Ansible..."
-	data.ProgressPercent = 30
+	data.ProgressPercent = 99
 
 	log.Printf("%s", data.ProgressMessage)
 	data.Unlock()
 
 	// Creating new Post Request to start ansible deployment
-	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, FullDeployURL, nil)
+	req, err := http.NewRequestWithContext(context.TODO(), http.MethodPost, DeployURL, nil)
 	if err != nil {
 		return fmt.Errorf("failed to deploy: %w", err)
 	}
 
-	log.Printf("Making GET request to %s", FullDeployURL)
+	log.Printf("Making the request to %s", DeployURL)
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -80,6 +86,21 @@ func ansible_deploy(hostname string) error {
 	}
 
 	log.Printf("Response %d:\n%s", resp.StatusCode, buf)
+
+	// Check for an Error file in the temp dirctory to know that deploy failed
+	for {
+		if _, err := os.Stat("/tmp/error.log"); err == nil {
+			_, err := os.ReadFile("/tmp/error.log")
+			if err != nil {
+				fmt.Errorf("Error Reading File: %s")
+			}
+			return fmt.Errorf("Failed to deploy: Please check error log for details")
+			break
+		}
+		//log.Printf("No Error.log detected, Waiting 10 seconds")
+		time.Sleep(10 * time.Second)
+
+	}
 
 	switch resp.StatusCode {
 	case http.StatusOK:

@@ -3,7 +3,10 @@ package ansible
 import (
 	"context"
 	"fmt"
-	"os/exec"
+
+	//"os/exec"
+
+	"github.com/codeskyblue/go-sh"
 )
 
 const (
@@ -26,13 +29,19 @@ func (c *Client) Deploy(ctx context.Context, id string) error {
 		"--vault-password-file", c.PathVaultPassword,
 	}
 
-	cmd := exec.CommandContext(ctx, _ansibleCommand, args...)
-	if err := cmd.Start(); err != nil {
-		return fmt.Errorf("unable to run command: %w", err)
-	}
+	session := sh.NewSession()
+	session.SetDir("/")
+	cmd := session.Command(_ansibleCommand, args).Run()
+	session.ShowCMD = true
+	fmt.Printf("Command: %s\n", cmd)
+	/*
+		cmd := exec.CommandContext(ctx, _ansibleCommand, args...)
+		if err := cmd.Start(); err != nil {
+			return fmt.Errorf("unable to run command: %w", err)
+		}
 
-	cmd.Wait()
-
+		cmd.Wait()
+	*/
 	return nil
 }
 
@@ -44,16 +53,22 @@ func (c *Client) Refloat(ctx context.Context, id string) error {
 		"--vault-password-file", c.PathVaultPassword,
 	}
 
-	cmd := exec.CommandContext(ctx, _ansibleCommand, args...)
+	session := sh.NewSession()
+	session.SetDir("/")
+	cmd := session.Command(_ansibleCommand, args).Run()
+	session.ShowCMD = true
+
+	//cmd := exec.CommandContext(ctx, _ansibleCommand, args...)
 	fmt.Printf("Command: %s\n", cmd)
-	if err := cmd.Start(); err != nil {
-		return fmt.Errorf("unable to run command: %w", err)
-	}
+	/*
+		if err := cmd.Start(); err != nil {
+			return fmt.Errorf("unable to run command: %w", err)
+		}
 
-	if err := cmd.Wait(); err != nil {
-		return fmt.Errorf("unable to finish execution: %w", err)
-	}
-
+		if err := cmd.Wait(); err != nil {
+			return fmt.Errorf("unable to finish execution: %w", err)
+		}
+	*/
 	return nil
 }
 
@@ -65,10 +80,16 @@ func (c *Client) Rebuild(ctx context.Context, id string) error {
 		"--vault-password-file", c.PathVaultPassword,
 	}
 
-	cmd := exec.CommandContext(ctx, _ansibleCommand, args...)
-	if err := cmd.Start(); err != nil {
-		return fmt.Errorf("unable to run command: %w", err)
-	}
-
+	session := sh.NewSession()
+	session.SetDir("/")
+	cmd := session.Command(_ansibleCommand, args).Run()
+	session.ShowCMD = true
+	fmt.Printf("Command: %s\n", cmd)
+	/*
+		cmd := exec.CommandContext(ctx, _ansibleCommand, args...)
+		if err := cmd.Start(); err != nil {
+			return fmt.Errorf("unable to run command: %w", err)
+		}
+	*/
 	return nil
 }

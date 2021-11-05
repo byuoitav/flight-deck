@@ -308,22 +308,24 @@ func deployHandler(c echo.Context) error {
 	case err != nil:
 		return c.Redirect(http.StatusTemporaryRedirect, "/pages/deployingFailed")
 	}
+	/*
+		go func() {
+			// Kick off the last tasks of deployment and cleanup
+			if err = finishDeployment(); err != nil {
+				data.Lock()
+				data.Error = fmt.Errorf("Failed running cleanup tasks: %w", err)
+				data.Unlock()
 
-	go func() {
-		// Kick off the last tasks of deployment and cleanup
-		if err = finishDeployment(); err != nil {
-			data.Lock()
-			data.Error = fmt.Errorf("Failed running cleanup tasks: %w", err)
-			data.Unlock()
-
-			log.Printf("Failed to clean up: %s", err)
-		}
-	}()
-
+				log.Printf("Failed to clean up: %s", err)
+			}
+		}()
+	*/
 	data.ProgressTitle = "Deploying Code from Ansible..."
-	data.ProgressPercent = 0
+	data.ProgressPercent = 50
 
 	return c.Redirect(http.StatusTemporaryRedirect, "/pages/progress")
+	//return c.Redirect(http.StatusTemporaryRedirect, "/pages/deploying")
+
 }
 
 func rebootHandler(c echo.Context) error {

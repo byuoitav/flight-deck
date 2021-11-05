@@ -8,6 +8,7 @@ require (
 	github.com/byuoitav/authmiddleware v1.1.2
 	github.com/byuoitav/common v0.0.0-20191210190714-e9b411b3cc0d
 	github.com/byuoitav/event-translator-microservice v0.0.0-20181026200649-3c2b7d913ca7
+	github.com/codeskyblue/go-sh v0.0.0-20200712050446-30169cf553fe // indirect
 	github.com/deckarep/golang-set v1.7.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/fatih/color v1.9.0 // indirect

@@ -52,7 +52,7 @@ func main() {
 
 	pflag.CommandLine.IntVarP(&port, "port", "P", 8080, "port to run the server on")
 	pflag.StringVarP(&logLevel, "log-level", "L", "", "level to log at. refer to https://godoc.org/go.uber.org/zap/zapcore#Level for options")
-	pflag.StringVarP(&opaURL, "opa-address", "a", "", "OPA Address (Full URL)")
+	pflag.StringVarP(&opaURL, "opa-address", "a", "", "OPA Address Full URL")
 	pflag.StringVarP(&opaToken, "opa-token", "t", "", "OPA Token")
 	pflag.StringVarP(&pathDeployPlaybook, "deploy-playbook", "", "", "path to the ansible deployment playbook")
 	pflag.StringVarP(&pathRefloatPlaybook, "refloat-playbook", "", "", "path to the ansible refloat playbook")
