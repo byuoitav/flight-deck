@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 )
 
@@ -46,6 +47,38 @@ type options struct {
 	MaxSize       string `yaml:"max-size,omitempty"`
 	Mode          string `yaml:"mode,omitempty"`
 	MaxBufferSize string `yaml:"max-buffer-size,omitempty"`
+}
+
+func trimQuote(s string) string {
+	if len(s) > 0 && s[0] == '\'' {
+		s = s[1:]
+	}
+
+	if len(s) > 0 && s[len(s)-1] == '\'' {
+		s = s[:len(s)-1]
+	}
+	return s
+}
+
+func errorParser(str string) string {
+	lines := strings.Split(str, "\n")
+	for _, line := range lines {
+		texts := strings.Split(string(line), ":")
+		for i, text := range texts {
+			if strings.Contains(text, "msg") {
+				next := texts[i+1]
+				log.Printf("MSG String: %s\n", next)
+				pt := strings.Split(next, ",")
+				ft := pt[0]
+				clean := strings.Trim(ft, " ")
+				final := trimQuote(clean)
+				log.Printf("MSG Final: %s\n", final)
+				return final
+			}
+			break
+		}
+	}
+	return ""
 }
 
 func ansible_deploy(hostname string) error {
@@ -90,15 +123,33 @@ func ansible_deploy(hostname string) error {
 	// Check for an Error file in the temp dirctory to know that deploy failed
 	for {
 		if _, err := os.Stat("/tmp/error.log"); err == nil {
-			_, err := os.ReadFile("/tmp/error.log")
+			var final string
+			logFile, err := os.ReadFile("/tmp/error.log")
 			if err != nil {
-				fmt.Errorf("Error Reading File: %s")
+				fmt.Errorf("Error Reading File: %s", err.Error())
 			}
-			return fmt.Errorf("Failed to deploy: Please check error log for details")
+			//eep := errorParser(string(logFile))
+			lines := strings.Split(string(logFile), "\n")
+			for _, line := range lines {
+				texts := strings.Split(string(line), ":")
+				for i, text := range texts {
+					if strings.Contains(text, "msg") {
+						next := texts[i+1]
+						log.Printf("MSG String: %s\n", next)
+						pt := strings.Split(next, ",")
+						ft := pt[0]
+						clean := strings.Trim(ft, " ")
+						final = trimQuote(clean)
+						log.Printf("MSG Final: %s\n", final)
+					}
+					break
+				}
+			}
+			return fmt.Errorf("Failed to deploy: %s", final)
 			break
 		}
 		//log.Printf("No Error.log detected, Waiting 10 seconds")
-		time.Sleep(10 * time.Second)
+		time.Sleep(5 * time.Second)
 
 	}
 
