@@ -44,7 +44,9 @@ func main() {
 
 	router := common.NewRouter()
 
-	router.POST("/float", server.handleFloat)
+	router.POST("/refloat", server.handleFloat)
+	router.POST("/rebuild", server.handleRebuild)
+	router.POST("/deploy", server.handleDeploy)
 
 	addr := fmt.Sprintf(":%d", *port)
 	router.Start(addr)

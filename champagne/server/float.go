@@ -94,15 +94,20 @@ func (s *Server) handleFloat(c echo.Context) error {
 // given location
 func (s *Server) floatDevice(name, env string) error {
 
-	// Make the request to flight-deck
-	res, err := s.wso2Client.Get(fmt.Sprintf(
-		"https://api.byu.edu/domains/av/flight-deck/%s/webhook_device/%s",
-		env,
-		name,
-	))
+	URL := fmt.Sprintf("https://api.byu.edu:443/domains/av/flight-deck/v2/refloat/%s", name)
+	log.L.Debugf("URL: %s", URL)
+
+	// Make the request to WSO2
+	req, err := http.NewRequest("POST", URL, nil)
 	if err != nil {
-		return fmt.Errorf("Error while making request to flight-deck: %w", err)
+		return fmt.Errorf("Error Building Request: %w", err)
 	}
+
+	res, err := s.wso2Client.Do(req)
+	if err != nil {
+		return fmt.Errorf("Error is sending response: %w", err)
+	}
+	fmt.Printf("Request: %s", res)
 
 	// If we got an error back try to figure out what went wrong
 	defer res.Body.Close()

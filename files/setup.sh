@@ -4,17 +4,6 @@ echo ""
 echo "Hi From Danny"
 echo ""
 
-# pin docker version
-cat <<EOT >>/etc/apt/preferences.d/docker
-Package: docker-ce
-Pin: version 5:19.03.14~3-0~raspbian-buster
-Pin-Priority: 1001
-
-Package: docker-ce-cli
-Pin: version 5:19.03.14~3-0~raspbian-buster
-Pin-Priority: 1001
-EOT
-
 mkdir -p /etc/i3
 
 # download i3 config
@@ -24,7 +13,7 @@ until $(curl -fksSL https://raw.githubusercontent.com/byuoitav/flight-deck/maste
 done
 
 # download champagne
-until $(curl -fksSL https://github.com/byuoitav/flight-deck/releases/download/v0.2.10/pi.tar.gz > /tmp/pi.tar.gz); do
+until $(curl -fksSL https://github.com/byuoitav/flight-deck/raw/master/champagne/pi/pi.tar.gz > /tmp/pi.tar.gz); do
 	echo "Unable to download champagne"
 	sleep 10
 done
