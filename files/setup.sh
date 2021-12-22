@@ -13,7 +13,7 @@ until $(curl -fksSL https://raw.githubusercontent.com/byuoitav/flight-deck/maste
 done
 
 # download champagne
-until $(curl -fksSL https://github.com/byuoitav/flight-deck/raw/ansible/champagne/pi/pi.tar.gz > /tmp/pi.tar.gz); do
+until $(curl -fksSL https://github.com/byuoitav/flight-deck/raw/master/champagne/pi/pi.tar.gz > /tmp/pi.tar.gz); do
 	echo "Unable to download champagne"
 	sleep 10
 done

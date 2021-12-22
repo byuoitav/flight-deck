@@ -94,7 +94,7 @@ func (s *Server) handleRebuild(c echo.Context) error {
 // given location
 func (s *Server) rebuildDevice(name, env string) error {
 
-	URL := fmt.Sprintf("https://api.byu.edu:443/domains/av/flight-deck/dev/rebuild/%s", name)
+	URL := fmt.Sprintf("https://api.byu.edu:443/domains/av/flight-deck/v2/rebuild/%s", name)
 	log.L.Debugf("URL: %s", URL)
 
 	req, err := http.NewRequest("POST", URL, nil)

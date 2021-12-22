@@ -94,7 +94,7 @@ func (s *Server) handleFloat(c echo.Context) error {
 // given location
 func (s *Server) floatDevice(name, env string) error {
 
-	URL := fmt.Sprintf("https://api.byu.edu:443/domains/av/flight-deck/dev/refloat/%s", name)
+	URL := fmt.Sprintf("https://api.byu.edu:443/domains/av/flight-deck/v2/refloat/%s", name)
 	log.L.Debugf("URL: %s", URL)
 
 	// Make the request to WSO2
