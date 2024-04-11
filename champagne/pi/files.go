@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"log"
@@ -130,15 +131,18 @@ func changeIP(ip *net.IPNet) error {
 		cmd := exec.Command(perm, app, conn, mod, profile, ipv4addName, ipv4add, ipvgatewayName, ipv4gateway, ipv4methodName, ipv4method, ipv4dnsName, ipv4dns)
 		log.Printf("Command: %s\n", cmd.String())
 
-		out, err := cmd.Output()
+		var out bytes.Buffer
+		var stderr bytes.Buffer
+		cmd.Stdout = &out
+		cmd.Stderr = &stderr
+
+		err := cmd.Run()
 		if err != nil {
-			if len(out) > 0 {
-				log.Printf("STDOUT\n****\n%s\n****", string(out))
-			}
+			log.Printf(fmt.Sprintf(err) + ":" + stderr.String())
 			log.Printf("Failed to run command: %v\n", err.Error())
 			return fmt.Errorf("Failed to run command: %v", err.Error())
 		}
-		log.Printf("Output: %v\n", out)
+		log.Printf("Output: %v\n", out.String())
 	}
 
 	if OSReleaseInt <= 11 {
