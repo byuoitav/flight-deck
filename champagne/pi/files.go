@@ -118,7 +118,7 @@ func changeIP(ip *net.IPNet) error {
 		app := "nmcli"
 		conn := "connection"
 		mod := "modify"
-		profile := "'Wired connection 1'"
+		profile := "Wired connection 1"
 		ipv4addName := "ipv4.address"
 		ipv4add := ip.String()
 		ipvgatewayName := "ipv4.gateway"
