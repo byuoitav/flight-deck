@@ -130,6 +130,7 @@ func changeIP(ip *net.IPNet) error {
 		log.Printf("Command: %s\n", cmd.String())
 		out, err := cmd.Output()
 		if err != nil {
+			log.Printf("Failed to run command: %v\n", err.Error())
 			return fmt.Errorf("Failed to run command: %v", err.Error())
 		}
 		log.Printf("Output: %v\n", out)
