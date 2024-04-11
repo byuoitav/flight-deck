@@ -97,8 +97,12 @@ func changeIP(ip *net.IPNet) error {
 	// Starting with bookworm, debian/raspbian started using network manager
 	// We are only deploying Bookworm from here on out but we want a way to fall back for a little bit
 	OSReleaseInfo := ReadOSReleaseInfo(ReleaseFile)
-	OSRelease := OSInfo["VERSION_ID"]
-	OSReleaseFloat := strconv.ParseFloat(OSRelease, 64)
+	OSRelease := OSReleaseInfo["VERSION_ID"]
+	OSReleaseFloat, err := strconv.ParseFloat(OSRelease, 64)
+	if err != nil {
+		fmt.Errorf("Failed to convert OS Release version from string to float: %v\n", err.Error())
+	}
+
 	OSReleaseInt := int(OSReleaseFloat)
 
 	log.Printf("Setting up static IP address\n")
@@ -126,7 +130,6 @@ func changeIP(ip *net.IPNet) error {
 			return fmt.Errorf("Failed to run command: %v", err.Error())
 		}
 		log.Printf("Output: %v\n", out)
-		return nil
 	}
 
 	if OSReleaseInt <= 11 {
@@ -157,7 +160,8 @@ func changeIP(ip *net.IPNet) error {
 		case len(toWrite) != n:
 			return fmt.Errorf("failed to write: wrote %v/%v bytes", n, len(toWrite))
 		}
-
-		return nil
 	}
+
+	return nil
+
 }
