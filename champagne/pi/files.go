@@ -3,17 +3,37 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"net"
 	"os"
+	"os/exec"
+	"strconv"
 	"strings"
 	"time"
+
+	"github.com/go-ini/ini"
 )
 
 const (
 	HostnameFile = "/etc/hostname"
 	DHCPFile     = "/etc/dhcpcd.conf"
 	HostsFile    = "/etc/hosts"
+	ReleaseFile  = "/etc/os-release"
 )
+
+func ReadOSReleaseInfo(configfile string) map[string]string {
+	cfg, err := ini.Load(configfile)
+	if err != nil {
+		fmt.Errorf("Fail to read file: ", err)
+	}
+
+	ConfigParams := make(map[string]string)
+	ConfigParams["ID"] = cfg.Section("").Key("ID").String()
+	ConfigParams["VERSION_CODENAME"] = cfg.Section("").Key("VERSION_CODENAME").String()
+	ConfigParams["VERSION_ID"] = cfg.Section("").Key("VERSION_ID").String()
+
+	return ConfigParams
+}
 
 func waitForFile(ctx context.Context, name string, checkForContent bool) error {
 	ticker := time.NewTicker(500 * time.Millisecond)
@@ -73,51 +93,71 @@ func changeHostname(hn string) error {
 func changeIP(ip *net.IPNet) error {
 	// TODO copy to backup
 
-	f, err := os.OpenFile(DHCPFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		return fmt.Errorf("failed to open file %q: %w", DHCPFile, err)
-	}
-	defer f.Close()
+	// Check if OS is Bookworm or an older version
+	// Starting with bookworm, debian/raspbian started using network manager
+	// We are only deploying Bookworm from here on out but we want a way to fall back for a little bit
+	OSReleaseInfo := ReadOSReleaseInfo(ReleaseFile)
+	OSRelease := OSInfo["VERSION_ID"]
+	OSReleaseFloat := strconv.ParseFloat(OSRelease, 64)
+	OSReleaseInt := int(OSReleaseFloat)
 
-	// TODO get this from the current subnet, just like the mask?
-	// default router address is .1
-	router := ip.IP.Mask(ip.Mask)
-	router = incrementIP(router)
+	log.Printf("Setting up static IP address\n")
 
-	var str strings.Builder
+	if OSReleaseInt >= 12 {
+		log.Printf("Setting up static IP address\n")
 
-	// TODO interface name
-	str.WriteString("\ninterface eth0\n")
-	str.WriteString(fmt.Sprintf("static ip_address=%s\n", ip.String()))
-	str.WriteString(fmt.Sprintf("static routers=%s\n", router.String()))
-	str.WriteString("static domain_name_servers=127.0.0.1 10.8.0.19 10.8.0.26\n")
+		router := ip.IP.Mask(ip.Mask)
+		router = incrementIP(router)
 
-	toWrite := str.String()
-	n, err := f.WriteString(toWrite)
-	switch {
-	case err != nil:
-		return fmt.Errorf("failed to write: %w", err)
-	case len(toWrite) != n:
-		return fmt.Errorf("failed to write: wrote %v/%v bytes", n, len(toWrite))
-	}
+		perm := "sudo"
+		app := "nmcli"
+		connmod := "connection modify"
+		profile := "Wired connection 1"
+		ipv4addName := "ipv4.address"
+		ipv4add := ip.String()
+		ipv4gateway := router.String()
+		ipv4method := "manual"
+		ipv4dns := "127.0.0.1,10.8.0.19,10.8.0.26"
 
-	// update resolve.conf (to use dnsmasq)
-	/*
-		resolveFile, err := os.Create(ResolveFile)
+		cmd := exec.Command(perm, app, connmod, strconv.Quote(profile), ipv4addName, ipv4add, ipv4gateway, ipv4method, ipv4dns)
+		log.Printf("Command: %s\n", cmd.String())
+		out, err := cmd.Output()
 		if err != nil {
-			return fmt.Errorf("failed to open file %q: %w", ResolveFile, err)
+			return fmt.Errorf("Failed to run command: %v", err.Error())
 		}
-		defer resolveFile.Close()
+		log.Printf("Output: %v\n", out)
+		return nil
+	}
 
-		resolveWrite := []byte("nameserver    127.0.0.1")
-		n, err = resolveFile.Write(resolveWrite)
+	if OSReleaseInt <= 11 {
+		f, err := os.OpenFile(DHCPFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			return fmt.Errorf("failed to open file %q: %w", DHCPFile, err)
+		}
+		defer f.Close()
+
+		// TODO get this from the current subnet, just like the mask?
+		// default router address is .1
+		router := ip.IP.Mask(ip.Mask)
+		router = incrementIP(router)
+
+		var str strings.Builder
+
+		// TODO interface name
+		str.WriteString("\ninterface eth0\n")
+		str.WriteString(fmt.Sprintf("static ip_address=%s\n", ip.String()))
+		str.WriteString(fmt.Sprintf("static routers=%s\n", router.String()))
+		str.WriteString("static domain_name_servers=127.0.0.1 10.8.0.19 10.8.0.26\n")
+
+		toWrite := str.String()
+		n, err := f.WriteString(toWrite)
 		switch {
 		case err != nil:
 			return fmt.Errorf("failed to write: %w", err)
-		case len(resolveWrite) != n:
-			return fmt.Errorf("failed to write: wrote %v/%v bytes", n, len(resolveWrite))
+		case len(toWrite) != n:
+			return fmt.Errorf("failed to write: wrote %v/%v bytes", n, len(toWrite))
 		}
-	*/
 
-	return nil
+		return nil
+	}
 }
