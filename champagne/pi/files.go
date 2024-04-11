@@ -119,8 +119,11 @@ func changeIP(ip *net.IPNet) error {
 		profile := "Wired connection 1"
 		ipv4addName := "ipv4.address"
 		ipv4add := ip.String()
+		ipvgatewayName := "ipv4.gateway"
 		ipv4gateway := router.String()
+		ipv4methodName := "ipv4.method"
 		ipv4method := "manual"
+		ipv4dnsName := "ipv4.dns"
 		ipv4dns := "127.0.0.1,10.8.0.19,10.8.0.26"
 
 		cmd := exec.Command(perm, app, connmod, strconv.Quote(profile), ipv4addName, ipv4add, ipv4gateway, ipv4method, ipv4dns)
