@@ -117,7 +117,7 @@ func changeIP(ip *net.IPNet) error {
 		app := "nmcli"
 		conn := "connection"
 		mod := "modify"
-		profile := "Wired connection 1"
+		profile := "'Wired connection 1'"
 		ipv4addName := "ipv4.address"
 		ipv4add := ip.String()
 		ipvgatewayName := "ipv4.gateway"
@@ -127,8 +127,9 @@ func changeIP(ip *net.IPNet) error {
 		ipv4dnsName := "ipv4.dns"
 		ipv4dns := "127.0.0.1,10.8.0.19,10.8.0.26"
 
-		cmd := exec.Command(perm, app, conn, mod, strconv.Quote(profile), ipv4addName, ipv4add, ipvgatewayName, ipv4gateway, ipv4methodName, ipv4method, ipv4dnsName, ipv4dns)
+		cmd := exec.Command(perm, app, conn, mod, profile, ipv4addName, ipv4add, ipvgatewayName, ipv4gateway, ipv4methodName, ipv4method, ipv4dnsName, ipv4dns)
 		log.Printf("Command: %s\n", cmd.String())
+
 		out, err := cmd.Output()
 		if err != nil {
 			if len(out) > 0 {
