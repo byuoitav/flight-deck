@@ -97,6 +97,8 @@ func changeIP(ip *net.IPNet) error {
 	// Check if OS is Bookworm or an older version
 	// Starting with bookworm, debian/raspbian started using network manager
 	// We are only deploying Bookworm from here on out but we want a way to fall back for a little bit
+	var err error
+
 	OSReleaseInfo := ReadOSReleaseInfo(ReleaseFile)
 	OSRelease := OSReleaseInfo["VERSION_ID"]
 	OSReleaseFloat, err := strconv.ParseFloat(OSRelease, 64)
@@ -131,9 +133,9 @@ func changeIP(ip *net.IPNet) error {
 		ipv4dns := "127.0.0.1,10.8.0.19,10.8.0.26"
 
 		nmcmd := exec.Command(app, conn, mod, old_profile, connid, new_profile)
-		log.Printf("Command: %s\n", cmd.String())
+		log.Printf("Command: %s\n", nmcmd.String())
 
-		cmd := exec.Command(perm, app, conn, mod, profile, ipv4addName, ipv4add, ipvgatewayName, ipv4gateway, ipv4methodName, ipv4method, ipv4dnsName, ipv4dns)
+		cmd := exec.Command(perm, app, conn, mod, new_profile, ipv4addName, ipv4add, ipvgatewayName, ipv4gateway, ipv4methodName, ipv4method, ipv4dnsName, ipv4dns)
 		log.Printf("Command: %s\n", cmd.String())
 
 		var out bytes.Buffer
@@ -141,7 +143,7 @@ func changeIP(ip *net.IPNet) error {
 		nmcmd.Stdout = &out
 		nmcmd.Stderr = &stderr
 
-		err := nmcmd.Run()
+		err = nmcmd.Run()
 		if err != nil {
 			log.Printf(fmt.Sprintf(err.Error()) + ":" + stderr.String())
 			log.Printf("Failed to run command: %v\n", err.Error())
@@ -152,7 +154,7 @@ func changeIP(ip *net.IPNet) error {
 		cmd.Stdout = &out
 		cmd.Stderr = &stderr
 
-		err := cmd.Run()
+		err = cmd.Run()
 		if err != nil {
 			log.Printf(fmt.Sprintf(err.Error()) + ":" + stderr.String())
 			log.Printf("Failed to run command: %v\n", err.Error())
