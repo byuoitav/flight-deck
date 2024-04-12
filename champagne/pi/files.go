@@ -118,7 +118,9 @@ func changeIP(ip *net.IPNet) error {
 		app := "nmcli"
 		conn := "connection"
 		mod := "modify"
-		profile := "Wired connection 1"
+		old_profile := "'Wired connection 1'"
+		new_profile := "byu-av"
+		connid := "connection.id"
 		ipv4addName := "ipv4.address"
 		ipv4add := ip.String()
 		ipvgatewayName := "ipv4.gateway"
@@ -128,11 +130,25 @@ func changeIP(ip *net.IPNet) error {
 		ipv4dnsName := "ipv4.dns"
 		ipv4dns := "127.0.0.1,10.8.0.19,10.8.0.26"
 
+		nmcmd := exec.Command(app, conn, mod, old_profile, connid, new_profile)
+		log.Printf("Command: %s\n", cmd.String())
+
 		cmd := exec.Command(perm, app, conn, mod, profile, ipv4addName, ipv4add, ipvgatewayName, ipv4gateway, ipv4methodName, ipv4method, ipv4dnsName, ipv4dns)
 		log.Printf("Command: %s\n", cmd.String())
 
 		var out bytes.Buffer
 		var stderr bytes.Buffer
+		nmcmd.Stdout = &out
+		nmcmd.Stderr = &stderr
+
+		err := nmcmd.Run()
+		if err != nil {
+			log.Printf(fmt.Sprintf(err.Error()) + ":" + stderr.String())
+			log.Printf("Failed to run command: %v\n", err.Error())
+			return fmt.Errorf("Failed to run command: %v", err.Error())
+		}
+		log.Printf("Output: %v\n", out.String())
+
 		cmd.Stdout = &out
 		cmd.Stderr = &stderr
 
