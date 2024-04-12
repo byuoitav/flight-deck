@@ -120,7 +120,7 @@ func changeIP(ip *net.IPNet) error {
 		app := "nmcli"
 		conn := "connection"
 		mod := "modify"
-		old_profile := "'Wired connection 1'"
+		old_profile := "Wired connection 1"
 		new_profile := "byu-av"
 		connid := "connection.id"
 		ipv4addName := "ipv4.address"
