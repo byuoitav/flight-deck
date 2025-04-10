@@ -169,4 +169,4 @@ bar {
         status_command i3status
 }
 
-exec chromium-browser --kiosk --incognito --no-sandbox --test-type --disable-pinch --overscroll-history-navigation=0 http://localhost/pages/redirect
+exec chromium-browser --kiosk --incognito --disable-extensions --disable-session-crashed-bubble --no-sandbox --test-type --disable-pinch --overscroll-history-navigation=0 --simulate-outdated-no-au='Tue, 31 Dec 2099 23:59:59 GMT' http://localhost/pages/redirect
