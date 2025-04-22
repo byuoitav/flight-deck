@@ -13,6 +13,6 @@ Most of the code in the repository deals with this service.
 
 Flightdeck files - The scripts and files that are pulled down from the image scripts that actually run the Champaign Pi Client on a Pi.  
 
-Image - files installed in the image on build that will reach out to github and download the flightdeck files. 
+Image - files installed directly in the Pi image on build that will reach out to github and download the flightdeck files. This runs as a service on the Pi when it boots and will be disabled by the Ansible deployment playbook. 
 
 Currently, we only use the binary directly installed on each system.  We could use docker down the road to run these service.  
