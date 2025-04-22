@@ -1,3 +1,18 @@
 # Flight-Deck
 
 Flight deck is an API to trigger ansible deployments.
+
+Champaign Code is setup as follows: 
+
+Champaign - Pi (client) -> tar.gz file that contains the binary of the go code along with the template and public folders that contains an Angular web site that used as a frontend to the deployment process. The Go code gets compiled and then tar balled with the template and public folders and is pulled down as part of the deploy process directly on the Pi.
+
+Champaign - Server ->  This is an intermediary that allows for the the client running on the Pi to make calls to Tyk (API Gateway) which will then run an Ansible playbook
+
+CMD/flightdeck - This is the main service that runs on the Ansible server that translates the calls from the Champaign server to Ansible and executes ansible playbooks
+Most of the code in the repository deals with this service.
+
+Flightdeck files - The scripts and files that are pulled down from the image scripts that actually run the Champaign Pi Client on a Pi.  
+
+Image - files installed in the image on build that will reach out to github and download the flightdeck files. 
+
+Currently, we only use the binary directly installed on each system.  We could use docker down the road to run these service.  
