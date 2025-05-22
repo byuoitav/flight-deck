@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	DeployURL      = "http://sandbag.byu.edu:2002/deploy"
+	DeployURL      = "http://flood.byu.edu:2002/deploy"
 	DeploymentFile = "/tmp/deployment.log"
 )
 
